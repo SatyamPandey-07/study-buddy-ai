@@ -1,11 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, Upload, Sparkles, Copy, Check } from "lucide-react";
-import { motion } from "framer-motion";
-import { useToast } from "@/hooks/use-toast";
+import { FileText, Upload, Sparkles, Copy, Check, History, Clock, Trash2, File } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
+import { summarizeAPI, uploadAPI } from "@/lib/api";
 
 type SummaryType = "bullets" | "keypoints" | "revision";
+
+type SummaryHistory = {
+  id: string;
+  title: string;
+  sourceType: string;
+  createdAt: string;
+};
 
 const SummarizeModule = () => {
   const [input, setInput] = useState("");
@@ -13,46 +21,206 @@ const SummarizeModule = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [summaryType, setSummaryType] = useState<SummaryType>("bullets");
   const [copied, setCopied] = useState(false);
-  const { toast } = useToast();
+  const [currentId, setCurrentId] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [summaryHistory, setSummaryHistory] = useState<SummaryHistory[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    loadSummaryHistory();
+  }, []);
+
+  const loadSummaryHistory = async () => {
+    try {
+      setLoadingHistory(true);
+      const data = await summarizeAPI.getHistory();
+      setSummaryHistory(data.summaries || []);
+    } catch (error) {
+      console.error('Failed to load summary history:', error);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  const loadSummary = async (id: string) => {
+    try {
+      setIsLoading(true);
+      const data = await summarizeAPI.getSummary(id);
+      setCurrentId(data.id);
+      setInput(data.originalContent);
+      setSummary(data.summary);
+      setShowHistory(false);
+    } catch (error) {
+      toast.error("Failed to load summary. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteSummary = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await summarizeAPI.deleteSummary(id);
+      setSummaryHistory(prev => prev.filter(s => s.id !== id));
+      toast.success("Summary deleted successfully.");
+    } catch (error) {
+      toast.error("Failed to delete summary.");
+    }
+  };
 
   const handleSummarize = async () => {
     if (!input.trim() || isLoading) return;
 
     setIsLoading(true);
 
-    // Simulate AI response (replace with actual AI call)
-    setTimeout(() => {
-      setSummary(generateMockSummary(input, summaryType));
+    try {
+      const title = input.substring(0, 50).trim() + (input.length > 50 ? '...' : '');
+      const data = await summarizeAPI.createSummary(input, title, summaryType);
+      setCurrentId(data.summary.id);
+      setSummary(data.summary.summary);
+      toast.success("Summary Generated! Your notes have been summarized successfully.");
+      loadSummaryHistory();
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Failed to generate summary. Please try again.");
+    } finally {
       setIsLoading(false);
-      toast({
-        title: "Summary Generated!",
-        description: "Your notes have been summarized successfully.",
-      });
-    }, 2000);
+    }
   };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(summary);
     setCopied(true);
-    toast({
-      title: "Copied!",
-      description: "Summary copied to clipboard.",
-    });
+    toast.success("Summary copied to clipboard!");
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      toast.error("Please upload a PDF file.");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File size must be less than 10MB.");
+      return;
+    }
+
+    setUploadingFile(true);
+    try {
+      const data = await uploadAPI.extractPDF(file);
+      setInput(data.totalText);
+      toast.success(`PDF uploaded! Extracted ${data.totalPages} pages.`);
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Failed to upload PDF. Please try again.");
+    } finally {
+      setUploadingFile(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
-    <div className="grid lg:grid-cols-2 gap-6">
+    <div className="flex gap-6">
+      {/* History Sidebar */}
+      <AnimatePresence>
+        {showHistory && (
+          <motion.div
+            initial={{ opacity: 0, x: -20, width: 0 }}
+            animate={{ opacity: 1, x: 0, width: 280 }}
+            exit={{ opacity: 0, x: -20, width: 0 }}
+            className="bg-card rounded-2xl border border-border shadow-card overflow-hidden flex-shrink-0"
+          >
+            <div className="p-4 border-b border-border">
+              <h3 className="font-heading font-semibold text-foreground flex items-center gap-2">
+                <History className="w-4 h-4" />
+                Summary History
+              </h3>
+            </div>
+            <div className="overflow-y-auto max-h-[500px]">
+              {loadingHistory ? (
+                <div className="p-4 text-center text-muted-foreground text-sm">
+                  Loading...
+                </div>
+              ) : summaryHistory.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground text-sm">
+                  No summaries yet
+                </div>
+              ) : (
+                summaryHistory.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => loadSummary(item.id)}
+                    className="w-full p-3 text-left hover:bg-muted/50 transition-colors border-b border-border/50 group"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="font-medium text-sm text-foreground truncate flex-1">
+                        {item.title}
+                      </div>
+                      <button
+                        onClick={(e) => deleteSummary(item.id, e)}
+                        className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-600 transition-opacity p-1"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                      <span className="capitalize">{item.sourceType}</span>
+                    </div>
+                    <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                      <Clock className="w-3 h-3" />
+                      {new Date(item.createdAt).toLocaleDateString()}
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex-1 grid lg:grid-cols-2 gap-6">
       {/* Input Section */}
       <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden flex flex-col h-[600px]">
         <div className="p-4 border-b border-border flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
             <Upload className="w-5 h-5 text-accent" />
           </div>
-          <div>
+          <div className="flex-1">
             <h3 className="font-heading font-semibold text-foreground">Input Notes</h3>
-            <p className="text-xs text-muted-foreground">Paste your text or upload a file</p>
+            <p className="text-xs text-muted-foreground">Paste your text or upload a PDF</p>
           </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingFile || isLoading}
+            >
+              <File className="w-4 h-4 mr-2" />
+              {uploadingFile ? "Uploading..." : "Upload PDF"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowHistory(!showHistory)}
+            >
+              <History className="w-4 h-4 mr-2" />
+              History
+            </Button>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
         </div>
 
         <div className="flex-1 p-4">
@@ -170,76 +338,9 @@ You can also paste content from PDFs, documents, or any source. The AI will anal
           )}
         </div>
       </div>
+      </div>
     </div>
   );
-};
-
-// Mock function - replace with actual AI integration
-const generateMockSummary = (text: string, type: SummaryType): string => {
-  const wordCount = text.split(/\s+/).length;
-  
-  const summaries: Record<SummaryType, string> = {
-    bullets: `📋 **Bullet Point Summary**
-
-• The main topic discusses key concepts and their relationships
-• Important factors include understanding the foundational elements
-• There are multiple interconnected components that work together
-• Practical applications can be derived from this understanding
-• The conclusion emphasizes the importance of comprehensive knowledge
-
-📊 **Statistics:**
-- Original length: ${wordCount} words
-- Summary: 5 key bullet points
-- Compression ratio: ~80%`,
-
-    keypoints: `🎯 **Key Points Extraction**
-
-**Main Idea:**
-The text focuses on explaining important concepts and their practical applications.
-
-**Supporting Points:**
-1. **First Key Concept** - Foundational understanding is essential
-2. **Second Key Concept** - Interconnected elements create complex systems
-3. **Third Key Concept** - Practical applications enhance learning
-
-**Critical Insights:**
-- Understanding relationships between concepts is crucial
-- Application of knowledge leads to deeper comprehension
-
-📊 Original: ${wordCount} words → Summary: Key points extracted`,
-
-    revision: `📚 **One-Page Revision Notes**
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**TOPIC OVERVIEW**
-This content covers fundamental concepts essential for understanding the subject matter.
-
-**REMEMBER THESE:**
-✓ Core principle #1: Understanding basics
-✓ Core principle #2: Connecting concepts
-✓ Core principle #3: Practical application
-
-**KEY DEFINITIONS:**
-• Term A: Essential foundation
-• Term B: Building blocks
-• Term C: Application layer
-
-**QUICK REVIEW QUESTIONS:**
-1. What are the main components?
-2. How do they interact?
-3. What are practical uses?
-
-**EXAM TIPS:**
-⭐ Focus on relationships between concepts
-⭐ Remember practical examples
-⭐ Review key definitions
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 Condensed from ${wordCount} words`,
-  };
-
-  return summaries[type];
 };
 
 export default SummarizeModule;

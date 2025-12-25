@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Sparkles, RotateCcw, User, Bot } from "lucide-react";
-import { motion } from "framer-motion";
+import { Send, Sparkles, RotateCcw, User, Bot, History, MessageSquare } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { explainAPI } from "@/lib/api";
+import { toast } from "sonner";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type Message = {
   id: string;
@@ -12,11 +15,65 @@ type Message = {
 
 type DifficultyLevel = "simple" | "medium" | "advanced";
 
+type Conversation = {
+  id: string;
+  title: string;
+  difficulty: string;
+  updatedAt: string;
+};
+
 const ExplainModule = () => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("simple");
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  // Load conversation history
+  useEffect(() => {
+    if (showHistory) {
+      loadConversationHistory();
+    }
+  }, [showHistory]);
+
+  const loadConversationHistory = async () => {
+    setLoadingHistory(true);
+    try {
+      const response = await explainAPI.getHistory();
+      setConversations(response.conversations || []);
+    } catch (error) {
+      console.error("Error loading history:", error);
+      toast.error("Failed to load conversation history");
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  const loadConversation = async (id: string) => {
+    try {
+      const response = await explainAPI.getConversation(id);
+      const conversation = response.conversation;
+      
+      setConversationId(conversation.id);
+      setDifficulty(conversation.difficulty as DifficultyLevel);
+      
+      const loadedMessages: Message[] = conversation.messages.map((msg: any) => ({
+        id: msg.id,
+        role: msg.role as "user" | "assistant",
+        content: msg.content,
+      }));
+      
+      setMessages(loadedMessages);
+      setShowHistory(false);
+      toast.success("Conversation loaded");
+    } catch (error) {
+      console.error("Error loading conversation:", error);
+      toast.error("Failed to load conversation");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,20 +89,38 @@ const ExplainModule = () => {
     setInput("");
     setIsLoading(true);
 
-    // Simulate AI response (replace with actual AI call)
-    setTimeout(() => {
+    try {
+      const response = await explainAPI.sendMessage(
+        input,
+        difficulty,
+        conversationId || undefined
+      );
+
+      if (response.conversationId && !conversationId) {
+        setConversationId(response.conversationId);
+      }
+
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: generateMockExplanation(input, difficulty),
+        content: response.assistantMessage?.content || response.response || "I couldn't generate a response.",
       };
+      
       setMessages((prev) => [...prev, aiResponse]);
+    } catch (error) {
+      console.error("Error getting explanation:", error);
+      toast.error("Failed to get explanation. Please try again.");
+      
+      // Remove the user message if the request failed
+      setMessages((prev) => prev.filter((msg) => msg.id !== userMessage.id));
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const clearChat = () => {
     setMessages([]);
+    setConversationId(null);
   };
 
   return (
@@ -63,9 +138,18 @@ const ExplainModule = () => {
               <p className="text-xs text-muted-foreground">Ask any concept</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={clearChat}>
-            <RotateCcw className="w-4 h-4" />
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant={showHistory ? "secondary" : "ghost"} 
+              size="icon" 
+              onClick={() => setShowHistory(!showHistory)}
+            >
+              <History className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={clearChat}>
+              <RotateCcw className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Messages */}
@@ -152,6 +236,73 @@ const ExplainModule = () => {
         </form>
       </div>
 
+      {/* Conversation History Sidebar */}
+      <AnimatePresence>
+        {showHistory && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="fixed right-4 top-20 w-80 max-h-[calc(100vh-120px)] bg-card rounded-2xl border border-border shadow-lg p-4 z-50 lg:relative lg:top-0 lg:right-0"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-primary" />
+                <h4 className="font-heading font-semibold text-foreground">Chat History</h4>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setShowHistory(false)} className="lg:hidden">
+                <RotateCcw className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <ScrollArea className="h-[500px]">
+              {loadingHistory ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+              ) : conversations.length === 0 ? (
+                <div className="text-center py-8">
+                  <MessageSquare className="w-12 h-12 text-muted-foreground/40 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No conversations yet</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {conversations.map((conv) => (
+                    <button
+                      key={conv.id}
+                      onClick={() => loadConversation(conv.id)}
+                      className={`w-full p-3 rounded-xl text-left transition-all hover:bg-muted ${
+                        conversationId === conv.id ? "bg-muted border border-primary" : "bg-card border border-border"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <p className="text-sm font-medium text-foreground truncate flex-1">
+                          {conv.title}
+                        </p>
+                        <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${
+                          conv.difficulty === "simple" ? "bg-green-500/10 text-green-500" :
+                          conv.difficulty === "medium" ? "bg-yellow-500/10 text-yellow-500" :
+                          "bg-red-500/10 text-red-500"
+                        }`}>
+                          {conv.difficulty}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(conv.createdAt).toLocaleDateString()} • {conv.messageCount} messages
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Settings Panel */}
       <div className="space-y-4">
         <div className="bg-card rounded-2xl border border-border p-4 shadow-card">
@@ -200,61 +351,6 @@ const ExplainModule = () => {
       </div>
     </div>
   );
-};
-
-// Mock function - replace with actual AI integration
-const generateMockExplanation = (topic: string, difficulty: DifficultyLevel): string => {
-  const explanations: Record<DifficultyLevel, string> = {
-    simple: `Great question about "${topic}"! 
-
-Let me explain this in simple terms:
-
-Think of it like this - imagine you're building with LEGO blocks. ${topic} works similarly, where different pieces come together to create something amazing.
-
-🎯 The main idea: It's basically about understanding how things connect and work together.
-
-💡 Real-world example: Just like how your phone needs a battery to work, ${topic} needs its own "power source" to function properly.
-
-Would you like me to explain any part in more detail?`,
-    
-    medium: `Here's a balanced explanation of "${topic}":
-
-**Overview:**
-${topic} is a fundamental concept that involves understanding the relationship between various components and their interactions.
-
-**Key Points:**
-1. It operates on specific principles that govern its behavior
-2. There are multiple factors that influence how it works
-3. Understanding the basics helps grasp more complex aspects
-
-**How it works:**
-The process involves several steps where each component plays a crucial role in the overall system.
-
-**Practical Application:**
-This concept is widely used in everyday life, from technology to natural phenomena.
-
-Need me to dive deeper into any specific aspect?`,
-    
-    advanced: `**In-depth Analysis of "${topic}":**
-
-**Theoretical Framework:**
-${topic} operates within a complex theoretical framework that encompasses multiple interconnected systems. The underlying mechanisms involve sophisticated processes that require comprehensive understanding of foundational principles.
-
-**Technical Details:**
-- Mechanism A: Operates through specific pathways with defined parameters
-- Mechanism B: Involves quantitative relationships and measurable outcomes
-- Mechanism C: Demonstrates emergent properties under specific conditions
-
-**Current Research:**
-Recent studies have expanded our understanding, revealing nuanced interactions and potential applications in advanced fields.
-
-**Implications:**
-The implications of this understanding extend to various domains, including practical applications and theoretical advancements.
-
-Would you like me to elaborate on any technical aspect or provide references?`,
-  };
-
-  return explanations[difficulty];
 };
 
 export default ExplainModule;

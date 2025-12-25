@@ -1,17 +1,19 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Menu, X } from "lucide-react";
+import { BookOpen, Menu, X, LogOut } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth, useClerk, UserButton } from "@clerk/clerk-react";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  
-  const navItems = [
-    { href: "/", label: "Home" },
-    { href: "/dashboard", label: "Dashboard" },
-  ];
+  const { isSignedIn } = useAuth();
+  const { signOut } = useClerk();
+
+  const handleSignOut = () => {
+    signOut();
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
@@ -27,31 +29,31 @@ const Header = () => {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  location.pathname === item.href
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
           {/* CTA Button */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" size="sm">
-              Sign In
-            </Button>
-            <Button variant="hero" size="sm">
-              Get Started
-            </Button>
+            {isSignedIn ? (
+              <>
+                <UserButton 
+                  afterSignOutUrl="/"
+                  appearance={{
+                    elements: {
+                      avatarBox: "w-9 h-9",
+                      userButtonPopoverCard: "shadow-xl"
+                    }
+                  }}
+                />
+                <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Link to="/sign-up">
+                <Button variant="hero" size="sm">
+                  Get Started
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -74,27 +76,36 @@ const Header = () => {
             className="md:hidden bg-background border-b border-border"
           >
             <div className="container mx-auto px-4 py-4 space-y-2">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    location.pathname === item.href
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
               <div className="pt-4 space-y-2">
-                <Button variant="ghost" className="w-full justify-center">
-                  Sign In
-                </Button>
-                <Button variant="hero" className="w-full justify-center">
-                  Get Started
-                </Button>
+                {isSignedIn ? (
+                  <>
+                    <div className="flex justify-center pb-2">
+                      <UserButton 
+                        afterSignOutUrl="/"
+                        appearance={{
+                          elements: {
+                            avatarBox: "w-12 h-12",
+                            userButtonPopoverCard: "shadow-xl"
+                          }
+                        }}
+                      />
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-center"
+                      onClick={handleSignOut}
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </>
+                ) : (
+                  <Link to="/sign-up" className="block">
+                    <Button variant="hero" className="w-full justify-center">
+                      Get Started
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </motion.div>

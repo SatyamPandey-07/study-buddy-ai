@@ -1,0 +1,126 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String         @id @default(cuid())
+  clerkId       String         @unique
+  email         String         @unique
+  name          String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  conversations Conversation[]
+  quizzes       Quiz[]
+  flashcards    FlashcardSet[]
+  summaries     Summary[]
+
+  @@index([clerkId])
+  @@index([email])
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String?
+  difficulty String   @default("medium") // simple, medium, advanced
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String       // user, assistant
+  content        String       @db.Text
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+}
+
+model Quiz {
+  id          String     @id @default(cuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic       String
+  difficulty  String     // easy, medium, hard
+  questions   Question[]
+  score       Int?
+  totalQuestions Int
+  completed   Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model Question {
+  id             String   @id @default(cuid())
+  quizId         String
+  quiz           Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  type           String   // mcq, short
+  question       String   @db.Text
+  options        String[] // For MCQ
+  correctAnswer  String
+  userAnswer     String?
+  explanation    String   @db.Text
+  isCorrect      Boolean?
+  createdAt      DateTime @default(now())
+
+  @@index([quizId])
+}
+
+model FlashcardSet {
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic       String
+  description String?
+  flashcards  Flashcard[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([userId])
+}
+
+model Flashcard {
+  id             String       @id @default(cuid())
+  flashcardSetId String
+  flashcardSet   FlashcardSet @relation(fields: [flashcardSetId], references: [id], onDelete: Cascade)
+  front          String       @db.Text
+  back           String       @db.Text
+  mastered       Boolean      @default(false)
+  reviewCount    Int          @default(0)
+  lastReviewedAt DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([flashcardSetId])
+}
+
+model Summary {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  content   String   @db.Text
+  summary   String   @db.Text
+  keyPoints String[] 
+  sourceType String  // text, pdf, url
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}

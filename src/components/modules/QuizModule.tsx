@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { HelpCircle, Sparkles, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
+import { HelpCircle, Sparkles, CheckCircle2, XCircle, ArrowRight, History, Trash2, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { quizAPI } from "@/lib/api";
 
 type Question = {
   id: string;
@@ -16,6 +17,15 @@ type Question = {
 
 type QuizState = "setup" | "active" | "results";
 
+type QuizHistory = {
+  id: string;
+  topic: string;
+  difficulty: string;
+  score: number | null;
+  totalQuestions: number;
+  createdAt: string;
+};
+
 const QuizModule = () => {
   const [topic, setTopic] = useState("");
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
@@ -25,25 +35,91 @@ const QuizModule = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [showExplanation, setShowExplanation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const [quizId, setQuizId] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [quizHistory, setQuizHistory] = useState<QuizHistory[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  useEffect(() => {
+    loadQuizHistory();
+  }, []);
+
+  const loadQuizHistory = async () => {
+    try {
+      setLoadingHistory(true);
+      const data = await quizAPI.getHistory();
+      setQuizHistory(data.quizzes || []);
+    } catch (error) {
+      console.error('Failed to load quiz history:', error);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  const loadQuiz = async (id: string) => {
+    try {
+      setIsLoading(true);
+      const data = await quizAPI.getQuiz(id);
+      setQuizId(data.id);
+      setTopic(data.topic);
+      setDifficulty(data.difficulty);
+      setQuestions(data.questions.map((q: any) => ({
+        id: q.id,
+        type: q.type === 'MCQ' ? 'mcq' : 'short',
+        question: q.question,
+        options: q.options,
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+      })));
+      setQuizState("active");
+      setCurrentIndex(0);
+      setAnswers({});
+      setShowExplanation(false);
+      setShowHistory(false);
+    } catch (error) {
+      toast.error("Failed to load quiz. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteQuiz = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await quizAPI.deleteQuiz(id);
+      setQuizHistory(prev => prev.filter(q => q.id !== id));
+      toast.success("Quiz deleted successfully.");
+    } catch (error) {
+      toast.error("Failed to delete quiz.");
+    }
+  };
 
   const handleGenerateQuiz = async () => {
     if (!topic.trim() || isLoading) return;
 
     setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      setQuestions(generateMockQuestions(topic, difficulty));
+    try {
+      const data = await quizAPI.generateQuiz(topic, difficulty, 5);
+      setQuizId(data.quiz.id);
+      setQuestions(data.quiz.questions.map((q: any) => ({
+        id: q.id,
+        type: q.type === 'MCQ' ? 'mcq' : 'short',
+        question: q.question,
+        options: q.options,
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+      })));
       setQuizState("active");
       setCurrentIndex(0);
       setAnswers({});
+      toast.success(`Quiz Generated! ${data.quiz.questions.length} questions ready for you.`);
+      loadQuizHistory();
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Failed to generate quiz. Please try again.");
+    } finally {
       setIsLoading(false);
-      toast({
-        title: "Quiz Generated!",
-        description: `${5} questions ready for you.`,
-      });
-    }, 2000);
+    }
   };
 
   const handleAnswer = (answer: string) => {
@@ -58,6 +134,7 @@ const QuizModule = () => {
       setCurrentIndex((prev) => prev + 1);
     } else {
       setQuizState("results");
+      submitQuizScore();
     }
   };
 
@@ -77,6 +154,18 @@ const QuizModule = () => {
     setAnswers({});
     setCurrentIndex(0);
     setShowExplanation(false);
+    setQuizId(null);
+  };
+
+  const submitQuizScore = async () => {
+    if (quizId) {
+      try {
+        await quizAPI.submitQuiz(quizId, answers);
+        loadQuizHistory();
+      } catch (error) {
+        console.error('Failed to submit quiz score:', error);
+      }
+    }
   };
 
   const currentQuestion = questions[currentIndex];
@@ -84,7 +173,75 @@ const QuizModule = () => {
   const isCorrect = currentAnswer?.toLowerCase() === currentQuestion?.correctAnswer.toLowerCase();
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="flex gap-6">
+      {/* History Sidebar */}
+      <AnimatePresence>
+        {showHistory && (
+          <motion.div
+            initial={{ opacity: 0, x: -20, width: 0 }}
+            animate={{ opacity: 1, x: 0, width: 280 }}
+            exit={{ opacity: 0, x: -20, width: 0 }}
+            className="bg-card rounded-2xl border border-border shadow-card overflow-hidden flex-shrink-0"
+          >
+            <div className="p-4 border-b border-border">
+              <h3 className="font-heading font-semibold text-foreground flex items-center gap-2">
+                <History className="w-4 h-4" />
+                Quiz History
+              </h3>
+            </div>
+            <div className="overflow-y-auto max-h-[500px]">
+              {loadingHistory ? (
+                <div className="p-4 text-center text-muted-foreground text-sm">
+                  Loading...
+                </div>
+              ) : quizHistory.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground text-sm">
+                  No quizzes yet
+                </div>
+              ) : (
+                quizHistory.map((quiz) => (
+                  <div
+                    key={quiz.id}
+                    className="relative group"
+                  >
+                    <button
+                      onClick={() => loadQuiz(quiz.id)}
+                      className="w-full p-3 text-left hover:bg-muted/50 transition-colors border-b border-border/50"
+                    >
+                      <div className="font-medium text-sm text-foreground truncate pr-8">
+                        {quiz.topic}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                        <span className="capitalize">{quiz.difficulty}</span>
+                        {quiz.score !== null && (
+                          <>
+                            <span>•</span>
+                            <span className={quiz.score >= quiz.totalQuestions / 2 ? "text-green-500" : "text-red-500"}>
+                              {quiz.score}/{quiz.totalQuestions}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                        <Clock className="w-3 h-3" />
+                        {new Date(quiz.createdAt).toLocaleDateString()}
+                      </div>
+                    </button>
+                    <button
+                      onClick={(e) => deleteQuiz(quiz.id, e)}
+                      className="absolute right-2 top-3 p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex-1 max-w-3xl mx-auto">
       <AnimatePresence mode="wait">
         {quizState === "setup" && (
           <motion.div
@@ -104,6 +261,18 @@ const QuizModule = () => {
               <p className="text-muted-foreground">
                 Enter a topic and let AI create a personalized quiz for you
               </p>
+            </div>
+
+            <div className="flex justify-end mb-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowHistory(!showHistory)}
+                className="flex items-center gap-2"
+              >
+                <History className="w-4 h-4" />
+                {showHistory ? "Hide History" : "Show History"}
+              </Button>
             </div>
 
             <div className="space-y-4">
@@ -324,53 +493,9 @@ const QuizModule = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
     </div>
   );
-};
-
-// Mock function - replace with actual AI integration
-const generateMockQuestions = (topic: string, difficulty: string): Question[] => {
-  return [
-    {
-      id: "1",
-      type: "mcq",
-      question: `What is a fundamental aspect of ${topic}?`,
-      options: ["Core principles and foundations", "Random unrelated concepts", "Historical events only", "Mathematical equations"],
-      correctAnswer: "Core principles and foundations",
-      explanation: `Understanding the core principles is essential for grasping ${topic}. These foundations help build more complex knowledge.`,
-    },
-    {
-      id: "2",
-      type: "mcq",
-      question: `Which of the following best describes the importance of studying ${topic}?`,
-      options: ["It has no practical applications", "It helps understand complex systems", "Only experts need to know it", "It's purely theoretical"],
-      correctAnswer: "It helps understand complex systems",
-      explanation: `Studying ${topic} helps us understand how complex systems work and interact, leading to practical applications.`,
-    },
-    {
-      id: "3",
-      type: "short",
-      question: `In one word, what is the primary goal when learning about ${topic}?`,
-      correctAnswer: "Understanding",
-      explanation: "The primary goal of learning any topic is to develop a deep understanding that can be applied in various contexts.",
-    },
-    {
-      id: "4",
-      type: "mcq",
-      question: `What approach is most effective for mastering ${topic}?`,
-      options: ["Memorization only", "Practice and application", "Avoiding difficult parts", "Speed reading"],
-      correctAnswer: "Practice and application",
-      explanation: "Practice and application are key to mastering any subject. They help reinforce learning and reveal areas that need more attention.",
-    },
-    {
-      id: "5",
-      type: "mcq",
-      question: `How does ${topic} relate to real-world scenarios?`,
-      options: ["It has no real-world connection", "Direct practical applications exist", "Only in academic settings", "Through abstract theories only"],
-      correctAnswer: "Direct practical applications exist",
-      explanation: `${topic} has numerous real-world applications that demonstrate its relevance and importance in everyday life.`,
-    },
-  ];
 };
 
 export default QuizModule;
