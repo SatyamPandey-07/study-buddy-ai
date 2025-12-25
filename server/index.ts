@@ -34,6 +34,10 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Study Buddy API is running' });
 });
 
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Study Buddy API is running' });
+});
+
 // API Routes
 app.use('/api/explain', explainRoutes);
 app.use('/api/summarize', summarizeRoutes);

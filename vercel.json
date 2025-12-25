@@ -1,18 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run build",
-  "devCommand": "npm run dev:all",
   "installCommand": "npm install",
   "framework": "vite",
   "outputDirectory": "dist",
   "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "http://localhost:3001/api/:path*"
-    }
-  ],
-  "env": {
-    "VITE_CLERK_PUBLISHABLE_KEY": "@clerk-publishable-key",
-    "VITE_API_URL": "@api-url"
-  }
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
