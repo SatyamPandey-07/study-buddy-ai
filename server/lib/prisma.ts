@@ -1,6 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import pg from 'pg';
 import dotenv from 'dotenv';
 
 // Load environment variables first
@@ -14,20 +12,15 @@ if (!connectionString) {
   throw new Error('DATABASE_URL is not defined in environment variables');
 }
 
-const pool = new pg.Pool({
-  connectionString,
-  ssl: {
-    rejectUnauthorized: false
-  },
-});
-
-const adapter = new PrismaPg(pool);
-
 export const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
-    adapter,
+    datasources: {
+      db: {
+        url: connectionString,
+      },
+    },
   });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
