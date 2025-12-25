@@ -2,6 +2,12 @@
 
 An intelligent learning platform powered by AI that helps students understand complex topics through interactive explanations, quizzes, flashcards, and summaries.
 
+🌐 **Live Demo**: [https://study-buddy-ai-lovat.vercel.app/](https://study-buddy-ai-lovat.vercel.app/)
+
+📡 **Backend API**: [https://study-buddy-ai-production.up.railway.app](https://study-buddy-ai-production.up.railway.app)
+
+**Deployed on**: [Vercel](https://vercel.com) (Frontend) & [Railway](https://railway.app) (Backend)
+
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)
