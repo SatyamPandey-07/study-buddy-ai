@@ -23,6 +23,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/sign-in" element={<SignIn />} />
             <Route path="/sign-up" element={<SignUp />} />
+              <Route path="/sign-up/sso-callback" element={<SignUp />} />
             <Route 
               path="/dashboard" 
               element={
