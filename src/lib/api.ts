@@ -203,4 +203,122 @@ export const uploadAPI = {
   },
 };
 
+// Session API (Pomodoro Timer)
+export const sessionAPI = {
+  startSession: async (module: string) => {
+    const { data } = await api.post('/api/session/start', { module });
+    return data;
+  },
+
+  endSession: async (sessionData: {
+    module: string;
+    duration: number;
+    focusScore?: number;
+    completed?: boolean;
+  }) => {
+    const { data } = await api.post('/api/session/end', sessionData);
+    return data;
+  },
+
+  getTodaySessions: async () => {
+    const { data } = await api.get('/api/session/today');
+    return data;
+  },
+
+  getStats: async (period: '7d' | '30d' | '90d') => {
+    const { data } = await api.get(`/api/session/stats?period=${period}`);
+    return data;
+  },
+};
+
+// Streak API
+export const streakAPI = {
+  getStreak: async () => {
+    const { data } = await api.get('/api/streak');
+    return data;
+  },
+
+  getAchievements: async () => {
+    const { data } = await api.get('/api/streak/achievements');
+    return data;
+  },
+
+  getDashboard: async () => {
+    const { data } = await api.get('/api/streak/dashboard');
+    return data;
+  },
+};
+
+// Resource API
+export const resourceAPI = {
+  getAll: async (filters?: { type?: string; search?: string }) => {
+    const params = new URLSearchParams();
+    if (filters?.type && filters.type !== 'all') params.append('type', filters.type);
+    if (filters?.search) params.append('search', filters.search);
+    
+    const queryString = params.toString();
+    const { data } = await api.get(`/api/resource${queryString ? '?' + queryString : ''}`);
+    return data;
+  },
+
+  getById: async (id: string) => {
+    const { data } = await api.get(`/api/resource/${id}`);
+    return data;
+  },
+
+  create: async (resource: {
+    title: string;
+    description?: string;
+    url?: string;
+    type: string;
+    category?: string;
+    tags?: string[];
+  }) => {
+    const { data } = await api.post('/api/resource', resource);
+    return data;
+  },
+
+  update: async (id: string, updates: {
+    title?: string;
+    description?: string;
+    url?: string;
+    type?: string;
+    category?: string;
+    tags?: string[];
+    isFavorite?: boolean;
+  }) => {
+    const { data } = await api.patch(`/api/resource/${id}`, updates);
+    return data;
+  },
+
+  delete: async (id: string) => {
+    const { data } = await api.delete(`/api/resource/${id}`);
+    return data;
+  },
+
+  upload: async (file: File, metadata: {
+    title: string;
+    description?: string;
+    type: string;
+    category?: string;
+    tags?: string[];
+  }) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('metadata', JSON.stringify(metadata));
+
+    const { data } = await api.post('/api/resource/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return data;
+  },
+
+  getStats: async () => {
+    const { data } = await api.get('/api/resource/stats/overview');
+    return data;
+  },
+};
+
 export default api;

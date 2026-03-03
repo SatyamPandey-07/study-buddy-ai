@@ -3,23 +3,21 @@ import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/layout/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Flame, Trophy, Clock, Target, TrendingUp, BookOpen } from "lucide-react";
-import { api } from "@/lib/api";
+import { streakAPI } from "@/lib/api";
 import { motion } from "framer-motion";
 
 export default function StatsPage() {
   const { data: dashboardData, isLoading } = useQuery({
     queryKey: ['streak-dashboard'],
     queryFn: async () => {
-      const response = await api.get('/streak/dashboard');
-      return response.data;
+      return await streakAPI.getDashboard();
     },
   });
 
   const { data: achievementsData } = useQuery({
     queryKey: ['achievements'],
     queryFn: async () => {
-      const response = await api.get('/streak/achievements');
-      return response.data;
+      return await streakAPI.getAchievements();
     },
   });
 

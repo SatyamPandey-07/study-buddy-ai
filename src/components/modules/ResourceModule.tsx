@@ -31,8 +31,8 @@ import {
   Search,
   Filter,
 } from "lucide-react";
-import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { resourceAPI } from "@/lib/api";
 
 const resourceIcons = {
   pdf: FileText,
@@ -61,27 +61,23 @@ export default function ResourceModule() {
   const { data: resourcesData, isLoading } = useQuery({
     queryKey: ['resources', typeFilter, searchQuery],
     queryFn: async () => {
-      const params = new URLSearchParams();
-      if (typeFilter !== 'all') params.append('type', typeFilter);
-      if (searchQuery) params.append('search', searchQuery);
-      
-      const response = await api.get(`/resource?${params.toString()}`);
-      return response.data;
+      return await resourceAPI.getAll({
+        type: typeFilter,
+        search: searchQuery,
+      });
     },
   });
 
   const { data: statsData } = useQuery({
     queryKey: ['resource-stats'],
     queryFn: async () => {
-      const response = await api.get('/resource/stats/overview');
-      return response.data;
+      return await resourceAPI.getStats();
     },
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await api.post('/resource', data);
-      return response.data;
+      return await resourceAPI.create(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['resources'] });
@@ -104,7 +100,7 @@ export default function ResourceModule() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      await api.delete(`/resource/${id}`);
+      await resourceAPI.delete(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['resources'] });
@@ -115,7 +111,7 @@ export default function ResourceModule() {
 
   const toggleFavoriteMutation = useMutation({
     mutationFn: async ({ id, favorite }: { id: string; favorite: boolean }) => {
-      await api.patch(`/resource/${id}`, { favorite });
+      await resourceAPI.update(id, { isFavorite: favorite });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['resources'] });

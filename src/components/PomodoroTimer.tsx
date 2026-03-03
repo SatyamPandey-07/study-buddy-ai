@@ -7,7 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { api } from "@/lib/api";
+import { sessionAPI } from "@/lib/api";
 
 const POMODORO_TIME = 25 * 60; // 25 minutes
 const BREAK_TIME = 5 * 60; // 5 minutes
@@ -45,7 +45,7 @@ export default function PomodoroTimer({ module = "general" }: PomodoroTimerProps
         const duration = Math.floor((Date.now() - startTime.getTime()) / 1000);
         
         try {
-          await api.post('/session/end', {
+          await sessionAPI.endSession({
             module,
             duration,
             completed: true,
