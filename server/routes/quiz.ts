@@ -1,4 +1,3 @@
-/// <reference types="../types" />
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import prisma from '../lib/prisma.js';

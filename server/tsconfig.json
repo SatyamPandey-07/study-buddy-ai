@@ -12,9 +12,8 @@
     "resolveJsonModule": true,
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "types": ["node"],
-    "typeRoots": ["./node_modules/@types", "./types"]
+    "types": ["node"]
   },
-  "include": ["**/*.ts", "**/*.d.ts", "./types/**/*.d.ts"],
+  "include": ["**/*.ts", "**/*.d.ts", "global.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
