@@ -6,7 +6,7 @@
   "outputDirectory": "dist",
   "functions": {
     "server/index.ts": {
-      "runtime": "vercel-node@latest",
+      "runtime": "@vercel/node",
       "includeFiles": "server/routes/**"
     }
   },
