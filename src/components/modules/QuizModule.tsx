@@ -116,7 +116,11 @@ const QuizModule = () => {
       toast.success(`Quiz Generated! ${data.quiz.questions.length} questions ready for you.`);
       loadQuizHistory();
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "Failed to generate quiz. Please try again.");
+      const errorMessage = error.response?.data?.error;
+      const displayMessage = typeof errorMessage === 'string'
+        ? errorMessage
+        : (errorMessage?.message || "Failed to generate quiz. Please try again.");
+      toast.error(displayMessage);
     } finally {
       setIsLoading(false);
     }

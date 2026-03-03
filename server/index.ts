@@ -44,7 +44,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Request logging
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  const fullPath = `${req.method} ${req.path}`;
+  console.log(`[${new Date().toISOString()}] Incoming request: ${fullPath}`);
+  console.log(`[${new Date().toISOString()}] Original URL: ${req.originalUrl}`);
   next();
 });
 
@@ -66,9 +68,13 @@ app.use('/api/upload', uploadRoutes);
 
 // Error handling middleware
 app.use((err: Error & { status?: number }, req: Request, res: Response, next: NextFunction) => {
-  console.error('Error:', err);
+  console.error('SERVER ERROR:', err);
+
+  // Ensure the error message is a string for the response
+  const errorMessage = typeof err === 'string' ? err : err.message || 'Internal server error';
+
   res.status(err.status || 500).json({
-    error: err.message || 'Internal server error',
+    error: errorMessage,
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 });
