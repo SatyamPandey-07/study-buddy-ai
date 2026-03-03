@@ -10,7 +10,7 @@ async function getApp(): Promise<express.Express> {
   if (_app) return _app;
   if (_initError) throw new Error(_initError);
   try {
-    const mod = await import('../server/index');
+    const mod = await import('../server/index.js');
     _app = mod.default as express.Express;
     return _app;
   } catch (err: any) {

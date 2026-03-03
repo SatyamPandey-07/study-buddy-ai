@@ -16,7 +16,7 @@ function createPrismaClient(): PrismaClient | null {
   }
   try {
     const sql = neon(connectionString);
-    const adapter = new PrismaNeon(sql);
+    const adapter = new PrismaNeon(sql as any);
     return new PrismaClient({ adapter } as any);
   } catch (e) {
     console.error('Failed to create Neon adapter, falling back to standard client:', e);

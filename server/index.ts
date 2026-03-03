@@ -14,11 +14,11 @@ if (missingVars.length > 0) {
 }
 
 // Import routes
-import explainRoutes from './routes/explain';
-import summarizeRoutes from './routes/summarize';
-import quizRoutes from './routes/quiz';
-import flashcardRoutes from './routes/flashcard';
-import uploadRoutes from './routes/upload';
+import explainRoutes from './routes/explain.js';
+import summarizeRoutes from './routes/summarize.js';
+import quizRoutes from './routes/quiz.js';
+import flashcardRoutes from './routes/flashcard.js';
+import uploadRoutes from './routes/upload.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;

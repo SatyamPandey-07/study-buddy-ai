@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth } from '../middleware/auth.js';
 import multer from 'multer';
 import { z } from 'zod';
 import { createRequire } from 'module';
