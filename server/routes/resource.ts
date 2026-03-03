@@ -8,6 +8,16 @@ const db = prisma as any;
 
 const router = Router();
 
+async function getOrCreateUser(clerkId: string, email?: string, name?: string) {
+  let user = await prisma.user.findUnique({ where: { clerkId } });
+  if (!user) {
+    user = await prisma.user.create({
+      data: { clerkId, email: email || `user-${clerkId}@temp.com`, name: name || undefined },
+    });
+  }
+  return user;
+}
+
 // Configure multer for resource file uploads
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -24,14 +34,19 @@ const resourceSchema = z.object({
   url: z.string().url().optional(),
   tags: z.array(z.string()).optional(),
   category: z.string().optional(),
-  metadata: z.any().optional(),
+  metadata: z.record(z.unknown()).optional(),
   linkedTo: z.string().optional(),
 });
 
 // Create a new resource
 router.post('/', requireAuth(), async (req, res, next) => {
   try {
-    const userId = req.auth.userId;
+    const user = await getOrCreateUser(
+      req.auth.userId,
+      req.auth.sessionClaims?.email as string,
+      req.auth.sessionClaims?.name as string,
+    );
+    const userId = user.id;
     const data = resourceSchema.parse(req.body);
 
     // If arxiv URL, fetch metadata
@@ -63,7 +78,12 @@ router.post('/', requireAuth(), async (req, res, next) => {
 // Upload a resource file (PDF, ebook, etc.)
 router.post('/upload', requireAuth(), upload.single('file'), async (req, res, next) => {
   try {
-    const userId = req.auth.userId;
+    const user = await getOrCreateUser(
+      req.auth.userId,
+      req.auth.sessionClaims?.email as string,
+      req.auth.sessionClaims?.name as string,
+    );
+    const userId = user.id;
 
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -95,10 +115,12 @@ router.post('/upload', requireAuth(), upload.single('file'), async (req, res, ne
 // Get all resources
 router.get('/', requireAuth(), async (req, res, next) => {
   try {
-    const userId = req.auth.userId;
+    const clerkId = req.auth.userId;
+    const user = await prisma.user.findUnique({ where: { clerkId } });
+    if (!user) return res.json({ resources: [] });
     const { type, category, search } = req.query;
 
-    const where: any = { userId };
+    const where: Record<string, unknown> = { userId: user.id };
 
     if (type) {
       where.type = type;
@@ -131,7 +153,10 @@ router.get('/', requireAuth(), async (req, res, next) => {
 // Get a single resource
 router.get('/:id', requireAuth(), async (req, res, next) => {
   try {
-    const userId = req.auth.userId;
+    const clerkId = req.auth.userId;
+    const user = await prisma.user.findUnique({ where: { clerkId } });
+    if (!user) return res.status(404).json({ error: 'Resource not found' });
+    const userId = user.id;
     const { id } = req.params;
 
     const resource = await db.resource.findFirst({
@@ -154,18 +179,16 @@ router.get('/:id', requireAuth(), async (req, res, next) => {
 // Update a resource
 router.patch('/:id', requireAuth(), async (req, res, next) => {
   try {
-    const userId = req.auth.userId;
+    const clerkId = req.auth.userId;
+    const user = await prisma.user.findUnique({ where: { clerkId } });
+    if (!user) return res.status(404).json({ error: 'Resource not found' });
+    const userId = user.id;
     const { id } = req.params;
 
-    const resource = await db.resource.findFirst({
-      where: { id, userId },
-    });
+    const resource = await db.resource.findFirst({ where: { id, userId } });
+    if (!resource) return res.status(404).json({ error: 'Resource not found' });
 
-    if (!resource) {
-      return res.status(404).json({ error: 'Resource not found' });
-    }
-
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     if (req.body.title) updateData.title = req.body.title;
     if (req.body.description !== undefined) updateData.description = req.body.description;
     if (req.body.tags) updateData.tags = req.body.tags;
@@ -186,12 +209,13 @@ router.patch('/:id', requireAuth(), async (req, res, next) => {
 // Delete a resource
 router.delete('/:id', requireAuth(), async (req, res, next) => {
   try {
-    const userId = req.auth.userId;
+    const clerkId = req.auth.userId;
+    const user = await prisma.user.findUnique({ where: { clerkId } });
+    if (!user) return res.status(404).json({ error: 'Resource not found' });
+    const userId = user.id;
     const { id } = req.params;
 
-    const resource = await db.resource.findFirst({
-      where: { id, userId },
-    });
+    const resource = await db.resource.findFirst({ where: { id, userId } });
 
     if (!resource) {
       return res.status(404).json({ error: 'Resource not found' });
@@ -210,7 +234,10 @@ router.delete('/:id', requireAuth(), async (req, res, next) => {
 // Get resource statistics
 router.get('/stats/overview', requireAuth(), async (req, res, next) => {
   try {
-    const userId = req.auth.userId;
+    const clerkId = req.auth.userId;
+    const user = await prisma.user.findUnique({ where: { clerkId } });
+    if (!user) return res.json({ total: 0, favorites: 0, typeBreakdown: {}, categoryBreakdown: {} });
+    const userId = user.id;
 
     const [total, byType, byCategory, favorites] = await Promise.all([
       db.resource.count({ where: { userId } }),
@@ -227,15 +254,13 @@ router.get('/stats/overview', requireAuth(), async (req, res, next) => {
       db.resource.count({ where: { userId, favorite: true } }),
     ]);
 
-    const typeBreakdown = byType.reduce((acc: any, item) => {
+    const typeBreakdown = byType.reduce((acc: Record<string, number>, item: { type: string; _count: number }) => {
       acc[item.type] = item._count;
       return acc;
     }, {});
 
-    const categoryBreakdown = byCategory.reduce((acc: any, item) => {
-      if (item.category) {
-        acc[item.category] = item._count;
-      }
+    const categoryBreakdown = byCategory.reduce((acc: Record<string, number>, item: { category: string | null; _count: number }) => {
+      if (item.category) acc[item.category] = item._count;
       return acc;
     }, {});
 
@@ -251,7 +276,7 @@ router.get('/stats/overview', requireAuth(), async (req, res, next) => {
 });
 
 // Helper function to fetch arXiv metadata
-async function fetchArxivMetadata(url: string): Promise<any> {
+async function fetchArxivMetadata(url: string): Promise<Record<string, unknown> | null> {
   try {
     // Extract arXiv ID from URL
     const arxivIdMatch = url.match(/(\d+\.\d+)/);

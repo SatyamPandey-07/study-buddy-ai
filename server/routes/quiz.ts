@@ -79,7 +79,7 @@ CRITICAL RULES:
       }
 
       // Clean up common JSON issues
-      let cleanJson = jsonMatch[0]
+      const cleanJson = jsonMatch[0]
         .replace(/,\s*,/g, ',')  // Remove double commas
         .replace(/,\s*}/g, '}')  // Remove trailing commas in objects
         .replace(/,\s*\]/g, ']'); // Remove trailing commas in arrays
@@ -87,7 +87,7 @@ CRITICAL RULES:
       questions = JSON.parse(cleanJson);
 
       // Validate and fix correctAnswer for MCQ questions
-      questions = questions.map((q: any) => {
+      questions = questions.map((q: { type: string; options?: string[]; correctAnswer: string }) => {
         if (q.type === 'mcq' && q.options && q.options.length > 0) {
           // If correctAnswer is a letter like "A", "B", "C", "D", convert to actual text
           const letterMatch = q.correctAnswer.match(/^([A-D])\.?$/i);

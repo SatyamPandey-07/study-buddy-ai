@@ -34,6 +34,18 @@ import {
 import { toast } from "sonner";
 import { resourceAPI } from "@/lib/api";
 
+interface Resource {
+  id: string;
+  title: string;
+  description?: string;
+  type: string;
+  url?: string;
+  tags: string[];
+  category?: string;
+  favorite: boolean;
+  createdAt: string;
+}
+
 const resourceIcons = {
   pdf: FileText,
   arxiv: BookOpen,
@@ -76,7 +88,7 @@ export default function ResourceModule() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: { title: string; description?: string; url?: string; type: string; category?: string; tags?: string[] }) => {
       return await resourceAPI.create(data);
     },
     onSuccess: () => {
@@ -331,7 +343,7 @@ export default function ResourceModule() {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {resources.map((resource: any) => {
+          {resources.map((resource: Resource) => {
             const Icon = resourceIcons[resource.type as keyof typeof resourceIcons] || FileText;
             
             return (

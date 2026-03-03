@@ -206,7 +206,7 @@ export default function StatsPage() {
               <CardContent>
                 <div className="space-y-3">
                   {achievementsData?.achievements?.length > 0 ? (
-                    achievementsData.achievements.map((achievement: any) => (
+                    achievementsData.achievements.map((achievement: { id: string; name: string; icon: string }) => (
                       <div
                         key={achievement.id}
                         className="flex items-center gap-3 p-2 rounded-lg bg-muted/50"
@@ -236,7 +236,7 @@ export default function StatsPage() {
             <CardContent>
               {dashboardData?.recentSessions?.length > 0 ? (
                 <div className="space-y-2">
-                  {dashboardData.recentSessions.slice(0, 5).map((session: any) => (
+                  {dashboardData.recentSessions.slice(0, 5).map((session: { id: string; module: string; startedAt: string; duration: number }) => (
                     <div
                       key={session.id}
                       className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
