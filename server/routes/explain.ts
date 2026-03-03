@@ -16,6 +16,14 @@ const explainSchema = z.object({
 // Create or continue conversation
 router.post('/', requireAuth(), async (req, res, next) => {
   try {
+    // Check required env vars
+    if (!process.env.DATABASE_URL) {
+      return res.status(503).json({ error: 'DATABASE_URL environment variable is not set. Please configure it in Vercel dashboard.' });
+    }
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(503).json({ error: 'GROQ_API_KEY environment variable is not set. Please configure it in Vercel dashboard.' });
+    }
+
     const userId = req.auth.userId;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });

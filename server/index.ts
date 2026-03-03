@@ -5,6 +5,14 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
+// Validate required environment variables at startup
+const REQUIRED_ENV_VARS = ['CLERK_SECRET_KEY', 'DATABASE_URL', 'GROQ_API_KEY'];
+const missingVars = REQUIRED_ENV_VARS.filter(v => !process.env[v]);
+if (missingVars.length > 0) {
+  console.error(`⚠️ Missing required environment variables: ${missingVars.join(', ')}`);
+  console.error('Please set these in your Vercel dashboard under Settings > Environment Variables');
+}
+
 // Import routes
 import explainRoutes from './routes/explain';
 import summarizeRoutes from './routes/summarize';
@@ -81,10 +89,17 @@ app.use('/api/upload', uploadRoutes);
 
 // Error handling middleware
 app.use((err: Error & { status?: number }, req: Request, res: Response, next: NextFunction) => {
-  console.error('SERVER ERROR:', err);
+  console.error('SERVER ERROR:', err.message);
+  console.error('STACK:', err.stack);
 
-  // Ensure the error message is a string for the response
   const errorMessage = typeof err === 'string' ? err : err.message || 'Internal server error';
+
+  // Return env var errors as 503 with clear message
+  if (errorMessage.includes('environment variable')) {
+    return res.status(503).json({
+      error: errorMessage,
+    });
+  }
 
   res.status(err.status || 500).json({
     error: errorMessage,

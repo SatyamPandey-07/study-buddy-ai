@@ -1,9 +1,12 @@
 // Groq AI Service (OpenAI-compatible API)
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
 
 export async function generateAIResponse(prompt: string, systemPrompt?: string): Promise<string> {
+  const GROQ_API_KEY = process.env.GROQ_API_KEY;
+  if (!GROQ_API_KEY) {
+    throw new Error('GROQ_API_KEY environment variable is not set. Please add it in your Vercel dashboard.');
+  }
   try {
     const messages = [];
     

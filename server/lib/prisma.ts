@@ -21,12 +21,11 @@ function createPrismaClient() {
       const adapter = new PrismaNeon(sql);
       return new PrismaClient({ adapter } as any);
     } catch (e) {
-      console.error('Failed to create Neon adapter, falling back to standard client:', e);
+      console.error('Failed to create Neon adapter:', e);
+      throw new Error('DATABASE_URL is set but failed to connect. Check that it is a valid Neon PostgreSQL connection string.');
     }
   }
-  return new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
-  });
+  throw new Error('DATABASE_URL environment variable is not set. Please add it in your Vercel dashboard under Settings > Environment Variables.');
 }
 
 export const prisma = globalForPrisma.prisma || createPrismaClient();
