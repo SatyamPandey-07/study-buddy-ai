@@ -193,6 +193,7 @@ router.patch('/:id', requireAuth(), async (req, res, next) => {
     if (req.body.description !== undefined) updateData.description = req.body.description;
     if (req.body.tags) updateData.tags = req.body.tags;
     if (req.body.category !== undefined) updateData.category = req.body.category;
+    if (req.body.isFavorite !== undefined) updateData.favorite = req.body.isFavorite;
     if (req.body.favorite !== undefined) updateData.favorite = req.body.favorite;
 
     const updated = await db.resource.update({

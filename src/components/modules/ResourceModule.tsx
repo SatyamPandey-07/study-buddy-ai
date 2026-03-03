@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -58,7 +58,13 @@ const resourceIcons = {
 export default function ResourceModule() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchQuery), 400);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -71,11 +77,11 @@ export default function ResourceModule() {
   const queryClient = useQueryClient();
 
   const { data: resourcesData, isLoading } = useQuery({
-    queryKey: ['resources', typeFilter, searchQuery],
+    queryKey: ['resources', typeFilter, debouncedSearch],
     queryFn: async () => {
       return await resourceAPI.getAll({
         type: typeFilter,
-        search: searchQuery,
+        search: debouncedSearch,
       });
     },
   });
