@@ -1,9 +1,15 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const getBaseURL = () => {
+  const url = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  // If it's a relative path starting with /api, or an absolute path ending with /api, 
+  // we return it as is but we'll need to be careful with the endpoints.
+  // Better yet: just make it clean.
+  return url;
+};
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -54,17 +60,17 @@ export const explainAPI = {
     });
     return data;
   },
-  
+
   getHistory: async () => {
     const { data } = await api.get('/api/explain/history');
     return data;
   },
-  
+
   getConversation: async (id: string) => {
     const { data } = await api.get(`/api/explain/${id}`);
     return data;
   },
-  
+
   deleteConversation: async (id: string) => {
     const { data } = await api.delete(`/api/explain/${id}`);
     return data;
@@ -81,7 +87,7 @@ export const quizAPI = {
     });
     return data;
   },
-  
+
   submitQuiz: async (quizId: string, answers: Record<string, string>) => {
     const { data } = await api.post('/api/quiz/submit', {
       quizId,
@@ -89,17 +95,17 @@ export const quizAPI = {
     });
     return data;
   },
-  
+
   getHistory: async () => {
     const { data } = await api.get('/api/quiz/history');
     return data;
   },
-  
+
   getQuiz: async (id: string) => {
     const { data } = await api.get(`/api/quiz/${id}`);
     return data;
   },
-  
+
   deleteQuiz: async (id: string) => {
     const { data } = await api.delete(`/api/quiz/${id}`);
     return data;
@@ -116,17 +122,17 @@ export const summarizeAPI = {
     });
     return data;
   },
-  
+
   getHistory: async () => {
     const { data } = await api.get('/api/summarize/history');
     return data;
   },
-  
+
   getSummary: async (id: string) => {
     const { data } = await api.get(`/api/summarize/${id}`);
     return data;
   },
-  
+
   deleteSummary: async (id: string) => {
     const { data } = await api.delete(`/api/summarize/${id}`);
     return data;
@@ -143,24 +149,24 @@ export const flashcardAPI = {
     });
     return data;
   },
-  
+
   getSets: async () => {
     const { data } = await api.get('/api/flashcard/sets');
     return data;
   },
-  
+
   getSet: async (id: string) => {
     const { data } = await api.get(`/api/flashcard/sets/${id}`);
     return data;
   },
-  
+
   updateCard: async (id: string, mastered: boolean) => {
     const { data } = await api.patch(`/api/flashcard/cards/${id}`, {
       mastered,
     });
     return data;
   },
-  
+
   deleteSet: async (id: string) => {
     const { data } = await api.delete(`/api/flashcard/sets/${id}`);
     return data;
@@ -172,7 +178,7 @@ export const uploadAPI = {
   uploadPDF: async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     const { data } = await api.post('/api/upload/pdf', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -180,11 +186,11 @@ export const uploadAPI = {
     });
     return data;
   },
-  
+
   extractPDF: async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     const { data } = await api.post('/api/upload/pdf/extract', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
