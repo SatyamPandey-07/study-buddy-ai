@@ -1,8 +1,13 @@
 {
   "version": 2,
   "framework": "vite",
-  "buildCommand": "npm run build",
+  "buildCommand": "npm install --include=dev && prisma generate && vite build",
   "installCommand": "npm install --include=dev",
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": ".prisma/**"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
