@@ -1,10 +1,29 @@
 import { Request, Response, NextFunction } from 'express';
-import { clerkClient } from '@clerk/clerk-sdk-node';
+
+// Cache the clerk client after first successful load
+let _clerkClient: any = null;
+
+// Lazy-load clerkClient so missing CLERK_SECRET_KEY doesn't crash at module init
+async function getClerkClient() {
+  if (!process.env.CLERK_SECRET_KEY) {
+    throw new Error('CLERK_SECRET_KEY is not set. Please add it in your Vercel dashboard under Settings > Environment Variables.');
+  }
+  if (!_clerkClient) {
+    const mod = await import('@clerk/clerk-sdk-node');
+    _clerkClient = mod.clerkClient;
+  }
+  return _clerkClient;
+}
 
 // Middleware to verify Clerk token and add user info to request
 export const requireAuth = () => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      if (!process.env.CLERK_SECRET_KEY) {
+        res.status(503).json({ error: 'Authentication service not configured. CLERK_SECRET_KEY is missing from environment variables.' });
+        return;
+      }
+
       const authHeader = req.headers.authorization;
       
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -13,6 +32,8 @@ export const requireAuth = () => {
       }
 
       const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+      const clerkClient = await getClerkClient();
 
       // Verify the token with Clerk
       const session = await clerkClient.verifyToken(token);
