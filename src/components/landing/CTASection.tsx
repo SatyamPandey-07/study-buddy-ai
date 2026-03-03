@@ -22,10 +22,10 @@ const CTASection = () => {
           className="max-w-3xl mx-auto text-center"
         >
           <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-secondary-foreground mb-6">
-            Ready to Transform Your Learning?
+            Ready to Study Smarter, Not Harder?
           </h2>
           <p className="text-lg text-secondary-foreground/70 mb-10 max-w-xl mx-auto">
-            Join thousands of students who are already learning smarter with AI-powered study tools.
+            Get instant AI explanations, auto-generated quizzes, flashcards, Pomodoro sessions, streaks, and more — all free.
           </p>
           <Link to="/dashboard">
             <Button 

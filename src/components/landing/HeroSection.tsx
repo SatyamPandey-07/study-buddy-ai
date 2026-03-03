@@ -46,7 +46,7 @@ const HeroSection = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-8"
           >
             <Sparkles className="w-4 h-4" />
-            <span>AI-Powered Learning Experience</span>
+            <span>AI-Powered Learning — 10 Features, Zero Compromise</span>
           </motion.div>
 
           {/* Headline */}
@@ -68,8 +68,7 @@ const HeroSection = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 text-balance"
           >
-            Transform the way you learn with AI that explains concepts, summarizes notes, 
-            generates quizzes, and creates flashcards—all tailored to your learning style.
+            Transform the way you learn with AI that explains concepts, summarizes notes, generates quizzes, and creates flashcards — plus Pomodoro sessions, streak tracking, a resource library, analytics, gamification, and an admin panel.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -98,9 +97,9 @@ const HeroSection = () => {
             className="mt-16 grid grid-cols-3 gap-8 max-w-xl mx-auto"
           >
             {[
-              { value: "10K+", label: "Active Students" },
-              { value: "50K+", label: "Concepts Explained" },
-              { value: "98%", label: "Satisfaction" },
+              { value: "10+", label: "AI Features" },
+              { value: "4", label: "Study Modules" },
+              { value: "100%", label: "Free to Use" },
             ].map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="font-heading text-2xl sm:text-3xl font-bold text-foreground">{stat.value}</div>

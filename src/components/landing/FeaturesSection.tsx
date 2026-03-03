@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Brain, FileText, HelpCircle, Layers, Timer, Flame, FolderOpen, Trophy, BarChart3 } from "lucide-react";
+import { Brain, FileText, HelpCircle, Layers, Timer, Flame, FolderOpen, Trophy, BarChart3, ShieldCheck } from "lucide-react";
 
 const features = [
   {
@@ -61,6 +61,13 @@ const features = [
     color: "bg-yellow-500/10 text-yellow-500",
     isNew: true,
   },
+  {
+    icon: ShieldCheck,
+    title: "Admin Panel & RBAC",
+    description: "Full role-based access control with an admin dashboard for user management, stats, and activity monitoring.",
+    color: "bg-rose-500/10 text-rose-500",
+    isNew: true,
+  },
 ];
 
 const FeaturesSection = () => {
@@ -86,7 +93,7 @@ const FeaturesSection = () => {
             <span className="gradient-text"> Learn Smarter</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Powerful AI tools designed to help you understand, retain, and excel in your studies.
+            10 powerful AI tools designed to help you understand, retain, and excel — with full progress tracking and admin controls.
           </p>
         </motion.div>
 

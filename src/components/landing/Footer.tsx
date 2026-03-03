@@ -35,7 +35,7 @@ const Footer = () => {
         </div>
 
         <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-          © 2024 StudyBuddy. Built with AI for students.
+          © 2026 StudyBuddy. Built with ❤️ using Groq · Clerk · Prisma · Neon · React.
         </div>
       </div>
     </footer>
