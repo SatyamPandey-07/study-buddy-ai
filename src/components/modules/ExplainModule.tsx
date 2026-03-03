@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Sparkles, RotateCcw, User, Bot, History, MessageSquare } from "lucide-react";
+import { Send, Sparkles, RotateCcw, User, Bot, History, MessageSquare, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { explainAPI } from "@/lib/api";
 import { toast } from "sonner";
@@ -72,6 +72,22 @@ const ExplainModule = () => {
     } catch (error) {
       console.error("Error loading conversation:", error);
       toast.error("Failed to load conversation");
+    }
+  };
+
+  const deleteConversation = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await explainAPI.deleteConversation(id);
+      setConversations(conversations.filter(conv => conv.id !== id));
+      if (conversationId === id) {
+        setConversationId(null);
+        setMessages([]);
+      }
+      toast.success("Conversation deleted");
+    } catch (error) {
+      console.error("Error deleting conversation:", error);
+      toast.error("Failed to delete conversation");
     }
   };
 
@@ -272,29 +288,40 @@ const ExplainModule = () => {
               ) : (
                 <div className="space-y-2">
                   {conversations.map((conv) => (
-                    <button
-                      key={conv.id}
-                      onClick={() => loadConversation(conv.id)}
-                      className={`w-full p-3 rounded-xl text-left transition-all hover:bg-muted ${
-                        conversationId === conv.id ? "bg-muted border border-primary" : "bg-card border border-border"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <p className="text-sm font-medium text-foreground truncate flex-1">
-                          {conv.title}
+                    <div key={conv.id} className="relative group">
+                      <button
+                        onClick={() => loadConversation(conv.id)}
+                        className={`w-full p-3 rounded-xl text-left transition-all hover:bg-muted ${
+                          conversationId === conv.id ? "bg-muted border border-primary" : "bg-card border border-border"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <p className="text-sm font-medium text-foreground truncate flex-1">
+                            {conv.title}
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${
+                              conv.difficulty === "simple" ? "bg-green-500/10 text-green-500" :
+                              conv.difficulty === "medium" ? "bg-yellow-500/10 text-yellow-500" :
+                              "bg-red-500/10 text-red-500"
+                            }`}>
+                              {conv.difficulty}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={(e) => deleteConversation(conv.id, e)}
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(conv.createdAt).toLocaleDateString()} • {conv.messageCount} messages
                         </p>
-                        <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${
-                          conv.difficulty === "simple" ? "bg-green-500/10 text-green-500" :
-                          conv.difficulty === "medium" ? "bg-yellow-500/10 text-yellow-500" :
-                          "bg-red-500/10 text-red-500"
-                        }`}>
-                          {conv.difficulty}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(conv.createdAt).toLocaleDateString()} • {conv.messageCount} messages
-                      </p>
-                    </button>
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}

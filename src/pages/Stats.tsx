@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Flame, Trophy, Clock, Target, TrendingUp, BookOpen } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Flame, Trophy, Clock, Target, TrendingUp, BookOpen, ArrowLeft } from "lucide-react";
 import { streakAPI } from "@/lib/api";
 import { motion } from "framer-motion";
 
 export default function StatsPage() {
+  const navigate = useNavigate();
+  
   const { data: dashboardData, isLoading } = useQuery({
     queryKey: ['streak-dashboard'],
     queryFn: async () => {
@@ -89,6 +93,15 @@ export default function StatsPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/dashboard')}
+              className="mb-4"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
             <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-2">
               Your Learning Journey
             </h1>
