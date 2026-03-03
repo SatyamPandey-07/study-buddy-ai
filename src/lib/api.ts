@@ -1,10 +1,13 @@
 import axios from 'axios';
 
 const getBaseURL = () => {
-  const url = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-  // If it's a relative path starting with /api, or an absolute path ending with /api, 
-  // we return it as is but we'll need to be careful with the endpoints.
-  // Better yet: just make it clean.
+  let url = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  // Remove trailing slash if present
+  url = url.replace(/\/$/, '');
+  // If the URL already ends with /api, remove it because we add it in our endpoint paths
+  if (url.endsWith('/api')) {
+    url = url.slice(0, -4);
+  }
   return url;
 };
 
