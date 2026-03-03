@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import prisma from '../lib/prisma.js';
 
+const db = prisma as any;
+
 const router = Router();
 
 // Get user streak information
@@ -9,13 +11,13 @@ router.get('/', requireAuth(), async (req, res, next) => {
   try {
     const userId = req.auth.userId;
 
-    let streak = await prisma.userStreak.findUnique({
+    let streak = await db.userStreak.findUnique({
       where: { userId },
     });
 
     if (!streak) {
       // Initialize streak for new user
-      streak = await prisma.userStreak.create({
+      streak = await db.userStreak.create({
         data: {
           userId,
           currentStreak: 0,
@@ -35,7 +37,7 @@ router.get('/', requireAuth(), async (req, res, next) => {
 
     if (daysDiff > 1) {
       // Streak broken, reset
-      streak = await prisma.userStreak.update({
+      streak = await db.userStreak.update({
         where: { userId },
         data: {
           currentStreak: 0,
@@ -55,10 +57,10 @@ router.get('/achievements', requireAuth(), async (req, res, next) => {
     const userId = req.auth.userId;
 
     const [streak, quizCount, flashcardCount, sessionCount] = await Promise.all([
-      prisma.userStreak.findUnique({ where: { userId } }),
+      db.userStreak.findUnique({ where: { userId } }),
       prisma.quiz.count({ where: { userId, completed: true } }),
       prisma.flashcardSet.count({ where: { userId } }),
-      prisma.studySession.count({ where: { userId } }),
+      db.studySession.count({ where: { userId } }),
     ]);
 
     const achievements = [];
@@ -118,13 +120,13 @@ router.get('/dashboard', requireAuth(), async (req, res, next) => {
       totalResources,
       recentSessions,
     ] = await Promise.all([
-      prisma.userStreak.findUnique({ where: { userId } }),
+      db.userStreak.findUnique({ where: { userId } }),
       prisma.quiz.count({ where: { userId } }),
       prisma.quiz.count({ where: { userId, completed: true } }),
       prisma.flashcardSet.count({ where: { userId } }),
       prisma.summary.count({ where: { userId } }),
-      prisma.resource.count({ where: { userId } }),
-      prisma.studySession.findMany({
+      db.resource.count({ where: { userId } }),
+      db.studySession.findMany({
         where: { userId },
         orderBy: { startedAt: 'desc' },
         take: 10,
@@ -135,7 +137,7 @@ router.get('/dashboard', requireAuth(), async (req, res, next) => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const recentActivity = await prisma.studySession.findMany({
+    const recentActivity = await db.studySession.findMany({
       where: {
         userId,
         startedAt: { gte: thirtyDaysAgo },

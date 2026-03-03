@@ -107,6 +107,14 @@ app.use((err: Error & { status?: number }, req: Request, res: Response, next: Ne
     });
   }
 
+  // Handle Zod validation errors with 400
+  if (err.name === 'ZodError') {
+    return res.status(400).json({
+      error: 'Validation error',
+      details: (err as any).errors,
+    });
+  }
+
   res.status(err.status || 500).json({
     error: errorMessage,
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),

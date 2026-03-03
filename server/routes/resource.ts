@@ -4,6 +4,8 @@ import prisma from '../lib/prisma.js';
 import { z } from 'zod';
 import multer from 'multer';
 
+const db = prisma as any;
+
 const router = Router();
 
 // Configure multer for resource file uploads
@@ -38,7 +40,7 @@ router.post('/', requireAuth(), async (req, res, next) => {
       metadata = await fetchArxivMetadata(data.url);
     }
 
-    const resource = await prisma.resource.create({
+    const resource = await db.resource.create({
       data: {
         userId,
         title: data.title,
@@ -71,7 +73,7 @@ router.post('/upload', requireAuth(), upload.single('file'), async (req, res, ne
 
     // In production, you'd upload to cloud storage (S3, Cloudinary, etc.)
     // For now, we'll store the file info
-    const resource = await prisma.resource.create({
+    const resource = await db.resource.create({
       data: {
         userId,
         title: title || req.file.originalname,
@@ -113,7 +115,7 @@ router.get('/', requireAuth(), async (req, res, next) => {
       ];
     }
 
-    const resources = await prisma.resource.findMany({
+    const resources = await db.resource.findMany({
       where,
       orderBy: {
         createdAt: 'desc',
@@ -132,7 +134,7 @@ router.get('/:id', requireAuth(), async (req, res, next) => {
     const userId = req.auth.userId;
     const { id } = req.params;
 
-    const resource = await prisma.resource.findFirst({
+    const resource = await db.resource.findFirst({
       where: {
         id,
         userId,
@@ -155,7 +157,7 @@ router.patch('/:id', requireAuth(), async (req, res, next) => {
     const userId = req.auth.userId;
     const { id } = req.params;
 
-    const resource = await prisma.resource.findFirst({
+    const resource = await db.resource.findFirst({
       where: { id, userId },
     });
 
@@ -170,7 +172,7 @@ router.patch('/:id', requireAuth(), async (req, res, next) => {
     if (req.body.category !== undefined) updateData.category = req.body.category;
     if (req.body.favorite !== undefined) updateData.favorite = req.body.favorite;
 
-    const updated = await prisma.resource.update({
+    const updated = await db.resource.update({
       where: { id },
       data: updateData,
     });
@@ -187,7 +189,7 @@ router.delete('/:id', requireAuth(), async (req, res, next) => {
     const userId = req.auth.userId;
     const { id } = req.params;
 
-    const resource = await prisma.resource.findFirst({
+    const resource = await db.resource.findFirst({
       where: { id, userId },
     });
 
@@ -195,7 +197,7 @@ router.delete('/:id', requireAuth(), async (req, res, next) => {
       return res.status(404).json({ error: 'Resource not found' });
     }
 
-    await prisma.resource.delete({
+    await db.resource.delete({
       where: { id },
     });
 
@@ -211,18 +213,18 @@ router.get('/stats/overview', requireAuth(), async (req, res, next) => {
     const userId = req.auth.userId;
 
     const [total, byType, byCategory, favorites] = await Promise.all([
-      prisma.resource.count({ where: { userId } }),
-      prisma.resource.groupBy({
+      db.resource.count({ where: { userId } }),
+      db.resource.groupBy({
         by: ['type'],
         where: { userId },
         _count: true,
       }),
-      prisma.resource.groupBy({
+      db.resource.groupBy({
         by: ['category'],
         where: { userId, category: { not: null } },
         _count: true,
       }),
-      prisma.resource.count({ where: { userId, favorite: true } }),
+      db.resource.count({ where: { userId, favorite: true } }),
     ]);
 
     const typeBreakdown = byType.reduce((acc: any, item) => {

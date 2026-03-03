@@ -3,10 +3,13 @@ import { requireAuth } from '../middleware/auth.js';
 import prisma from '../lib/prisma.js';
 import { z } from 'zod';
 
+// Type assertion for Prisma client - models are defined in schema
+const db = prisma as any;
+
 const router = Router();
 
 const sessionSchema = z.object({
-  module: z.enum(['explain', 'quiz', 'flashcards', 'summarize', 'resource']),
+  module: z.enum(['explain', 'quiz', 'flashcards', 'summarize', 'resource', 'general']),
   duration: z.number().min(1).max(7200), // max 2 hours
   focusScore: z.number().min(0).max(100).optional(),
   completed: z.boolean().optional(),
@@ -16,9 +19,9 @@ const sessionSchema = z.object({
 router.post('/start', requireAuth(), async (req, res, next) => {
   try {
     const userId = req.auth.userId;
-    const { module } = z.object({ module: z.enum(['explain', 'quiz', 'flashcards', 'summarize', 'resource']) }).parse(req.body);
+    const { module } = z.object({ module: z.enum(['explain', 'quiz', 'flashcards', 'summarize', 'resource', 'general']) }).parse(req.body);
 
-    const session = await prisma.studySession.create({
+    const session = await (prisma as any).studySession.create({
       data: {
         userId,
         module,
@@ -40,7 +43,7 @@ router.post('/end', requireAuth(), async (req, res, next) => {
     const userId = req.auth.userId;
     const { module, duration, focusScore } = sessionSchema.parse(req.body);
 
-    const session = await prisma.studySession.create({
+    const session = await (prisma as any).studySession.create({
       data: {
         userId,
         module,
@@ -67,7 +70,7 @@ router.get('/today', requireAuth(), async (req, res, next) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const sessions = await prisma.studySession.findMany({
+    const sessions = await (prisma as any).studySession.findMany({
       where: {
         userId,
         startedAt: {
@@ -102,7 +105,7 @@ router.get('/stats', requireAuth(), async (req, res, next) => {
       startDate.setDate(startDate.getDate() - 90);
     }
 
-    const sessions = await prisma.studySession.findMany({
+    const sessions = await db.studySession.findMany({
       where: {
         userId,
         startedAt: {
@@ -146,13 +149,13 @@ async function updateUserStreak(userId: string, duration: number) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  let streak = await prisma.userStreak.findUnique({
+  let streak = await (prisma as any).userStreak.findUnique({
     where: { userId },
   });
 
   if (!streak) {
     // Create new streak
-    streak = await prisma.userStreak.create({
+    streak = await (prisma as any).userStreak.create({
       data: {
         userId,
         currentStreak: 1,
@@ -181,7 +184,7 @@ async function updateUserStreak(userId: string, duration: number) {
 
     const newLongest = Math.max(newStreak, streak.longestStreak);
 
-    await prisma.userStreak.update({
+    await (prisma as any).userStreak.update({
       where: { userId },
       data: {
         currentStreak: newStreak,
