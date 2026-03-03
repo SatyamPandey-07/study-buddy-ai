@@ -251,14 +251,16 @@ export const streakAPI = {
 
 // Resource API
 export const resourceAPI = {
-  getAll: async (filters?: { type?: string; search?: string }) => {
+  getAll: async (filters?: { type?: string; search?: string; page?: number; limit?: number }) => {
     const params = new URLSearchParams();
     if (filters?.type && filters.type !== 'all') params.append('type', filters.type);
     if (filters?.search) params.append('search', filters.search);
+    if (filters?.page && filters.page > 1) params.append('page', filters.page.toString());
+    if (filters?.limit) params.append('limit', filters.limit.toString());
     
     const queryString = params.toString();
     const { data } = await api.get(`/api/resource${queryString ? '?' + queryString : ''}`);
-    return data;
+    return data as { resources: any[]; total: number; page: number; hasMore: boolean };
   },
 
   getById: async (id: string) => {

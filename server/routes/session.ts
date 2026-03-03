@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import prisma from '../lib/prisma.js';
+import { getOrCreateUser } from '../lib/user.js';
 import { z } from 'zod';
 
 const db = prisma as any;
@@ -13,21 +14,6 @@ const sessionSchema = z.object({
   focusScore: z.number().min(0).max(100).optional(),
   completed: z.boolean().optional(),
 });
-
-// Get-or-create internal user from Clerk ID
-async function getOrCreateUser(clerkId: string, email?: string, name?: string) {
-  let user = await prisma.user.findUnique({ where: { clerkId } });
-  if (!user) {
-    user = await prisma.user.create({
-      data: {
-        clerkId,
-        email: email || `user-${clerkId}@temp.com`,
-        name: name || undefined,
-      },
-    });
-  }
-  return user;
-}
 
 // Start a study session
 router.post('/start', requireAuth(), async (req, res, next) => {

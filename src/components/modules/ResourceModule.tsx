@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,14 +76,18 @@ export default function ResourceModule() {
 
   const queryClient = useQueryClient();
 
-  const { data: resourcesData, isLoading } = useQuery({
+  const {
+    data: resourcesData,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['resources', typeFilter, debouncedSearch],
-    queryFn: async () => {
-      return await resourceAPI.getAll({
-        type: typeFilter,
-        search: debouncedSearch,
-      });
-    },
+    queryFn: ({ pageParam }) =>
+      resourceAPI.getAll({ type: typeFilter, search: debouncedSearch, page: pageParam as number, limit: 20 }),
+    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.page + 1 : undefined,
+    initialPageParam: 1,
   });
 
   const { data: statsData } = useQuery({
@@ -131,7 +135,31 @@ export default function ResourceModule() {
     mutationFn: async ({ id, favorite }: { id: string; favorite: boolean }) => {
       await resourceAPI.update(id, { isFavorite: favorite });
     },
-    onSuccess: () => {
+    onMutate: async ({ id, favorite }) => {
+      await queryClient.cancelQueries({ queryKey: ['resources', typeFilter, debouncedSearch] });
+      const previousData = queryClient.getQueryData(['resources', typeFilter, debouncedSearch]);
+      queryClient.setQueryData(['resources', typeFilter, debouncedSearch], (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            resources: page.resources.map((r: Resource) =>
+              r.id === id ? { ...r, favorite } : r
+            ),
+          })),
+        };
+      });
+      return { previousData };
+    },
+    onError: (_err, _vars, context) => {
+      queryClient.setQueryData(
+        ['resources', typeFilter, debouncedSearch],
+        context?.previousData,
+      );
+      toast.error("Failed to update favourite");
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['resources'] });
     },
   });
@@ -150,7 +178,7 @@ export default function ResourceModule() {
     });
   };
 
-  const resources = resourcesData?.resources || [];
+  const resources = resourcesData?.pages.flatMap((p) => p.resources) ?? [];
 
   return (
     <div className="space-y-6">
@@ -432,6 +460,19 @@ export default function ResourceModule() {
               </Card>
             );
           })}
+        </div>
+      )}
+
+      {/* Load More */}
+      {hasNextPage && (
+        <div className="flex justify-center pt-2">
+          <Button
+            variant="outline"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? "Loading..." : "Load More"}
+          </Button>
         </div>
       )}
     </div>

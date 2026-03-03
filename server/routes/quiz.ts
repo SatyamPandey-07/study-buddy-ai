@@ -61,7 +61,10 @@ CRITICAL RULES:
 - Return ONLY valid JSON, no markdown, no extra text
 - ${difficulty} difficulty for ${topic}`;
 
-    const aiResponse = await generateAIResponse(prompt);
+    const aiResponse = await generateAIResponse(
+      prompt,
+      'You are an expert educational quiz creator. Output ONLY valid JSON arrays with no markdown or extra text. Every MCQ question must have exactly 4 distinct options. The correctAnswer must be the exact text of one of the options, never a letter like "A" or "B".',
+    );
 
     // Parse AI response
     let questions;

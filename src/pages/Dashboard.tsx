@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/layout/Header";
+import { useActiveModule } from "@/lib/activeModule";
 import { Brain, FileText, HelpCircle, Layers, FolderOpen } from "lucide-react";
 import ExplainModule from "@/components/modules/ExplainModule";
 import SummarizeModule from "@/components/modules/SummarizeModule";
@@ -18,6 +19,11 @@ const tabs = [
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("explain");
+  const { setActiveModule } = useActiveModule();
+
+  useEffect(() => {
+    setActiveModule(activeTab);
+  }, [activeTab, setActiveModule]);
 
   return (
     <div className="min-h-screen bg-background">

@@ -98,7 +98,10 @@ Format as JSON:
 Return ONLY valid JSON, no markdown.`;
     }
 
-    const aiResponse = await generateAIResponse(prompt);
+    const aiResponse = await generateAIResponse(
+      prompt,
+      'You are an expert study assistant and summarizer. Output ONLY valid JSON as instructed, with no markdown or extra text. Create clear, structured summaries optimised for learning and exam preparation.',
+    );
     
     // Parse AI response
     let parsedResponse: { summary: string; keyPoints: string[] };

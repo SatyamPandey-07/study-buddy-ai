@@ -5,12 +5,14 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth, useClerk, UserButton } from "@clerk/clerk-react";
 import PomodoroTimer from "@/components/PomodoroTimer";
+import { useActiveModule } from "@/lib/activeModule";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const { isSignedIn } = useAuth();
   const { signOut } = useClerk();
+  const { activeModule } = useActiveModule();
 
   const handleSignOut = () => {
     signOut();
@@ -34,7 +36,7 @@ const Header = () => {
           <div className="hidden md:flex items-center gap-3">
             {isSignedIn ? (
               <>
-                <PomodoroTimer />
+                <PomodoroTimer module={activeModule} />
                 <Link to="/dashboard/stats">
                   <Button variant="ghost" size="sm">
                     <BarChart3 className="w-4 h-4 mr-2" />

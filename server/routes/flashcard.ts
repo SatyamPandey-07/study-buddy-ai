@@ -64,7 +64,10 @@ Create flashcards as a JSON array:
 
 Cover key concepts, definitions, and important facts. Return ONLY the JSON array.`;
 
-    const aiResponse = await generateAIResponse(prompt);
+    const aiResponse = await generateAIResponse(
+      prompt,
+      'You are an expert flashcard creator for spaced repetition learning. Output ONLY valid JSON arrays with no markdown or extra text. Each flashcard front is a concise question or term; the back is a precise, memorable answer.',
+    );
     
     // Parse AI response
     let flashcards;

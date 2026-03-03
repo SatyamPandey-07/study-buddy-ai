@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -82,6 +82,11 @@ export default function StatsPage() {
 
   const { streak, stats } = dashboardData || {};
 
+  const isEmpty =
+    (streak?.currentStreak ?? 0) === 0 &&
+    (streak?.totalStudyTime ?? 0) === 0 &&
+    (dashboardData?.recentSessions?.length ?? 0) === 0;
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -109,6 +114,22 @@ export default function StatsPage() {
               Track your progress, maintain streaks, and celebrate achievements
             </p>
           </motion.div>
+
+          {/* Empty state for new users */}
+          {isEmpty && (
+            <Card className="mb-8 border-dashed">
+              <CardContent className="py-12 text-center">
+                <TrendingUp className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <h3 className="font-semibold text-lg mb-2">No activity yet</h3>
+                <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+                  Start a study session on the Dashboard to see your streaks, quiz scores, and activity heatmap here.
+                </p>
+                <Link to="/dashboard">
+                  <Button>Go to Dashboard</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Top Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

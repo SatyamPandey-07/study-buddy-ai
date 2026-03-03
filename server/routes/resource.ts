@@ -1,22 +1,13 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import prisma from '../lib/prisma.js';
+import { getOrCreateUser } from '../lib/user.js';
 import { z } from 'zod';
 import multer from 'multer';
 
 const db = prisma as any;
 
 const router = Router();
-
-async function getOrCreateUser(clerkId: string, email?: string, name?: string) {
-  let user = await prisma.user.findUnique({ where: { clerkId } });
-  if (!user) {
-    user = await prisma.user.create({
-      data: { clerkId, email: email || `user-${clerkId}@temp.com`, name: name || undefined },
-    });
-  }
-  return user;
-}
 
 // Configure multer for resource file uploads
 const storage = multer.memoryStorage();
@@ -137,14 +128,21 @@ router.get('/', requireAuth(), async (req, res, next) => {
       ];
     }
 
-    const resources = await db.resource.findMany({
-      where,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(50, parseInt(req.query.limit as string) || 20);
+    const skip = (page - 1) * limit;
 
-    res.json({ resources });
+    const [resources, total] = await Promise.all([
+      db.resource.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      db.resource.count({ where }),
+    ]);
+
+    res.json({ resources, total, page, hasMore: skip + resources.length < total });
   } catch (error) {
     next(error);
   }
@@ -286,7 +284,13 @@ async function fetchArxivMetadata(url: string): Promise<Record<string, unknown> 
     }
 
     const arxivId = arxivIdMatch[1];
-    const apiUrl = `http://export.arxiv.org/api/query?id_list=${arxivId}`;
+
+    // SSRF protection: only allow the known arXiv API hostname
+    const apiUrl = `https://export.arxiv.org/api/query?id_list=${arxivId}`;
+    const parsedApiUrl = new URL(apiUrl);
+    if (parsedApiUrl.hostname !== 'export.arxiv.org') {
+      return null;
+    }
 
     const response = await fetch(apiUrl);
     const xml = await response.text();
