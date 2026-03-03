@@ -39,11 +39,9 @@ router.post('/generate', requireAuth(), async (req, res, next) => {
     }
 
     // Generate questions using AI
-    const prompt = `Generate ${questionCount} quiz questions about "${topic}" at ${difficulty} difficulty level.
+    const prompt = `Generate ${questionCount} Multiple Choice Questions (MCQ) about "${topic}" at ${difficulty} difficulty level.
 
-IMPORTANT: Generate a MIX of Multiple Choice Questions (MCQ) and Short Answer questions.
-- At least ${Math.floor(questionCount * 0.6)} questions MUST be MCQ type
-- Remaining can be short answer type
+IMPORTANT: Return ONLY Multiple Choice Questions (MCQ). Each question must have exactly 4 options.
 
 Return ONLY a valid JSON array with this exact structure:
 [
@@ -53,47 +51,41 @@ Return ONLY a valid JSON array with this exact structure:
     "options": ["First option", "Second option", "Third option", "Fourth option"],
     "correctAnswer": "First option",
     "explanation": "Brief explanation why this is correct"
-  },
-  {
-    "type": "short",
-    "question": "Short answer question here?",
-    "correctAnswer": "Expected answer",
-    "explanation": "Brief explanation"
   }
 ]
 
 CRITICAL RULES:
-- For MCQ: correctAnswer MUST be the EXACT TEXT of one of the options, NOT a letter like "A" or "B"
-- For MCQ: Always provide exactly 4 options
-- Mix of MCQ (majority) and short answer questions
+- Return ONLY MCQ type questions
+- correctAnswer MUST be the EXACT TEXT of one of the options, NOT a letter like "A" or "B"
+- Always provide exactly 4 options
 - Return ONLY valid JSON, no markdown, no extra text
 - ${difficulty} difficulty for ${topic}`;
 
     const aiResponse = await generateAIResponse(prompt);
-    
+
     // Parse AI response
     let questions;
     try {
       // Extract JSON from response - handle markdown code blocks
       let jsonStr = aiResponse;
-      
+
       // Remove markdown code blocks if present
       jsonStr = jsonStr.replace(/```json\s*/gi, '').replace(/```\s*/g, '');
-      
+
       // Extract JSON array
       const jsonMatch = jsonStr.match(/\[[\s\S]*\]/);
       if (!jsonMatch) {
         throw new Error('No JSON array found in AI response');
       }
-      
+
       // Clean up common JSON issues
       let cleanJson = jsonMatch[0]
         .replace(/,\s*,/g, ',')  // Remove double commas
         .replace(/,\s*}/g, '}')  // Remove trailing commas in objects
         .replace(/,\s*\]/g, ']'); // Remove trailing commas in arrays
-      
+
       questions = JSON.parse(cleanJson);
-      
+
       // Validate and fix correctAnswer for MCQ questions
       questions = questions.map((q: any) => {
         if (q.type === 'mcq' && q.options && q.options.length > 0) {
@@ -108,7 +100,7 @@ CRITICAL RULES:
         }
         return q;
       });
-      
+
     } catch (parseError) {
       console.error('Failed to parse AI response:', aiResponse);
       throw new Error('Failed to parse quiz questions from AI');
@@ -197,9 +189,9 @@ router.post('/submit', requireAuth(), async (req, res, next) => {
     const gradedQuestions = await Promise.all(
       quiz.questions.map(async (question: { id: string; question: string; correctAnswer: string; explanation: string }) => {
         const userAnswer = answers[question.id];
-        const isCorrect = userAnswer?.toLowerCase().trim() === 
-                         question.correctAnswer.toLowerCase().trim();
-        
+        const isCorrect = userAnswer?.toLowerCase().trim() ===
+          question.correctAnswer.toLowerCase().trim();
+
         if (isCorrect) correctCount++;
 
         await prisma.question.update({
