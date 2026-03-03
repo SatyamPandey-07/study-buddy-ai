@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/layout/Header";
-import { Brain, FileText, HelpCircle, Layers } from "lucide-react";
+import { Brain, FileText, HelpCircle, Layers, FolderOpen } from "lucide-react";
 import ExplainModule from "@/components/modules/ExplainModule";
 import SummarizeModule from "@/components/modules/SummarizeModule";
 import QuizModule from "@/components/modules/QuizModule";
 import FlashcardModule from "@/components/modules/FlashcardModule";
+import ResourceModule from "@/components/modules/ResourceModule";
 
 const tabs = [
   { id: "explain", label: "Explain", icon: Brain, description: "Get AI explanations" },
   { id: "summarize", label: "Summarize", icon: FileText, description: "Summarize notes" },
   { id: "quiz", label: "Quiz", icon: HelpCircle, description: "Generate quizzes" },
   { id: "flashcards", label: "Flashcards", icon: Layers, description: "Create flashcards" },
+  { id: "resources", label: "Resources", icon: FolderOpen, description: "Manage materials" },
 ];
 
 const Dashboard = () => {
@@ -73,6 +75,7 @@ const Dashboard = () => {
               {activeTab === "summarize" && <SummarizeModule />}
               {activeTab === "quiz" && <QuizModule />}
               {activeTab === "flashcards" && <FlashcardModule />}
+              {activeTab === "resources" && <ResourceModule />}
             </motion.div>
           </AnimatePresence>
         </div>

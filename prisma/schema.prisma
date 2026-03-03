@@ -24,6 +24,9 @@ model User {
   quizzes       Quiz[]
   flashcards    FlashcardSet[]
   summaries     Summary[]
+  studySessions StudySession[]
+  streak        UserStreak?
+  resources     Resource[]
 
   @@index([clerkId])
   @@index([email])
@@ -125,4 +128,57 @@ model Summary {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+model StudySession {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  module      String   // explain, quiz, flashcards, summarize, resource
+  duration    Int      // in seconds
+  focusScore  Int?     // 0-100, optional quality metric
+  completed   Boolean  @default(true)
+  startedAt   DateTime @default(now())
+  endedAt     DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([startedAt])
+}
+
+model UserStreak {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentStreak  Int      @default(0)
+  longestStreak  Int      @default(0)
+  lastActivityAt DateTime @default(now())
+  totalStudyTime Int      @default(0) // in seconds
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Resource {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String?  @db.Text
+  type        String   // pdf, arxiv, article, ebook, video, other
+  url         String?  @db.Text
+  filePath    String?  // For uploaded files
+  fileSize    Int?     // in bytes
+  tags        String[] 
+  category    String?  // study, reference, reading, etc
+  metadata    Json?    // For arxiv: authors, abstract, etc
+  linkedTo    String?  // conversationId, quizId, flashcardSetId, summaryId
+  favorite    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([type])
+  @@index([category])
 }

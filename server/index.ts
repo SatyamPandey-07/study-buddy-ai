@@ -19,6 +19,9 @@ import summarizeRoutes from './routes/summarize.js';
 import quizRoutes from './routes/quiz.js';
 import flashcardRoutes from './routes/flashcard.js';
 import uploadRoutes from './routes/upload.js';
+import sessionRoutes from './routes/session.js';
+import streakRoutes from './routes/streak.js';
+import resourceRoutes from './routes/resource.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -86,6 +89,9 @@ app.use('/api/summarize', summarizeRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/flashcard', flashcardRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/session', sessionRoutes);
+app.use('/api/streak', streakRoutes);
+app.use('/api/resource', resourceRoutes);
 
 // Error handling middleware
 app.use((err: Error & { status?: number }, req: Request, res: Response, next: NextFunction) => {

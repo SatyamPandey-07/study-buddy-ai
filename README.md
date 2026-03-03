@@ -1,6 +1,6 @@
 # 🎓 Study Buddy AI
 
-An intelligent learning platform powered by AI that helps students understand complex topics through interactive explanations, quizzes, flashcards, and summaries.
+An intelligent learning platform powered by AI that helps students understand complex topics through interactive explanations, quizzes, flashcards, and summaries. Now with **Pomodoro Timer**, **Learning Streaks**, and **Resource Library** to supercharge your studying!
 
 🌐 **Live Demo**: [https://study-buddy-ai-lovat.vercel.app/](https://study-buddy-ai-lovat.vercel.app/)
 
@@ -17,41 +17,102 @@ An intelligent learning platform powered by AI that helps students understand co
 - **Interactive Explanations** - Get detailed explanations with adjustable difficulty levels (simple/medium/advanced)
   - Conversational AI that remembers context
   - Conversation history with delete functionality
+  - Ask follow-up questions seamlessly
 
 - **Smart Quiz Generator** - AI generates custom quizzes on any topic
   - Multiple choice (MCQ) and short answer questions
   - Automatic grading with detailed feedback
   - Score tracking and quiz history
   - Customizable difficulty and question count
+  - Instant explanations for incorrect answers
 
 - **Flashcard Creator** - Automated flashcard generation for effective studying
   - AI-generated question/answer pairs
   - Flip animation for interactive studying
   - Mastery tracking (learning/reviewing/mastered)
+  - Spaced repetition ready
   - Delete sets from history
 
 - **Content Summarizer** - Condense lengthy content into key points
   - Three modes: Bullet Points, Key Points, Revision Notes
-  - **PDF Upload Support** - Extract text directly from PDF files
+  - **PDF Upload Support** - Extract text directly from PDF files (up to 10MB)
   - History management with delete functionality
+  - Quick integration with Resource Library
+
+### ⏱️ NEW: Pomodoro Timer & Study Sessions
+
+- **Built-in Pomodoro Timer** - Stay focused with the proven 25/5 technique
+  - 25-minute focus sessions with 5-minute breaks
+  - Automatic session tracking
+  - Module-specific time tracking (quiz, flashcards, etc.)
+  - Real-time progress bar
+  - Accessible from any page via header
+
+- **Study Session Analytics**
+  - Track daily, weekly, and monthly study time
+  - Module breakdown (see where you spend most time)
+  - Session history with detailed logs
+  - Focus score tracking
+
+### 🔥 NEW: Learning Streaks & Gamification
+
+- **Daily Streak Counter** - Build consistent study habits
+  - Current streak and longest streak tracking
+  - Automatic streak maintenance
+  - Activity heatmap (90-day calendar view)
+  - GitHub-style contribution graph
+
+- **Achievement System**
+  - Unlock badges for milestones (3-day streak, 10 quizzes, etc.)
+  - Progress tracking across all modules
+  - Visual achievement gallery
+  - Motivational rewards
+
+- **Comprehensive Statistics Dashboard**
+  - Total study time and session count
+  - Quiz completion rates
+  - Flashcard mastery progress
+  - Resource library stats
+  - Recent activity feed
+  - Visual progress charts
+
+### 📚 NEW: Resource Library Manager
+
+- **Centralized Study Materials**
+  - Store PDFs, research papers, articles, videos, ebooks
+  - Auto-fetch arXiv paper metadata
+  - Tag and categorize resources
+  - Favorite/star important materials
+  - Full-text search across all resources
+
+- **Smart Organization**
+  - Filter by type, category, or tags
+  - Link resources to conversations, quizzes, or flashcards
+  - Quick "Summarize this" integration
+  - Track resource usage statistics
+  - Export and backup capabilities
 
 ### 🔐 Authentication & Security
 
 - **Clerk Authentication** - Secure user authentication and session management
 - **Protected Routes** - All API endpoints require authentication
 - **Automatic Token Refresh** - Seamless token management
+- **Privacy First** - Your data is yours alone
 
 ### 📁 Document Processing
 
-- **PDF Upload & Parsing** - Extract text from PDF files (up to 10MB)
+- **PDF Upload & Parsing** - Extract text from PDF files (up to 50MB for resources)
 - **Metadata extraction** - Page count, file info
-- **Integrated with Summarize module**
+- **Integrated with Summarize & Resource modules**
+- **Cloud-ready** - Designed for S3/Cloudinary integration
 
 ### 💾 Data Persistence
 
 - **PostgreSQL Database** - Cloud-hosted on Neon with SSL
-- **Prisma ORM v7** - Type-safe database access
-- **Complete Data Models** - Users, conversations, quizzes, flashcards, summaries
+- **Prisma ORM v7** - Type-safe database access with PrismaPg adapter
+- **Complete Data Models** - Users, conversations, quizzes, flashcards, summaries, study sessions, streaks, resources
+- **Cascading Deletes** - Clean data management
+- **Optimized Indexes** - Fast query performance
 
 ## 🛠️ Tech Stack
 
@@ -59,10 +120,11 @@ An intelligent learning platform powered by AI that helps students understand co
 - **React 18** with TypeScript
 - **Vite** - Development & build tool
 - **TanStack Query** - Server state management
-- **Shadcn/ui** - Component library
-- **Tailwind CSS** - Styling
-- **Framer Motion** - Animations
+- **Shadcn/ui** - Component library with 40+ components
+- **Tailwind CSS** - Styling with custom theme
+- **Framer Motion** - Smooth animations
 - **Sonner** - Toast notifications
+- **Recharts** - Data visualization (charts & graphs)
 
 ### Backend
 - **Node.js + Express 5** - REST API
@@ -73,12 +135,13 @@ An intelligent learning platform powered by AI that helps students understand co
 - **pdf-parse v2** - PDF text extraction
 
 ### AI & Auth
-- **Groq API** - LLaMA 3.1 8B Instant model
-- **Clerk** - Authentication
+- **Groq API** - LLaMA 3.1 8B Instant model (ultra-fast inference)
+- **Clerk** - Authentication & user management
 
 ### Database
 - **PostgreSQL** - Neon cloud database
 - **SSL/TLS** - Secure connections
+- **Connection pooling** - Optimized performance
 
 ## 🚀 Getting Started
 

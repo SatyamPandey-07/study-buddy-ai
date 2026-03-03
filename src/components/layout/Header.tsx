@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Menu, X, LogOut } from "lucide-react";
+import { BookOpen, Menu, X, LogOut, BarChart3 } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth, useClerk, UserButton } from "@clerk/clerk-react";
+import PomodoroTimer from "@/components/PomodoroTimer";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -33,6 +34,13 @@ const Header = () => {
           <div className="hidden md:flex items-center gap-3">
             {isSignedIn ? (
               <>
+                <PomodoroTimer />
+                <Link to="/dashboard/stats">
+                  <Button variant="ghost" size="sm">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Stats
+                  </Button>
+                </Link>
                 <UserButton 
                   afterSignOutUrl="/"
                   appearance={{
