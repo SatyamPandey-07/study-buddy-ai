@@ -12,8 +12,9 @@
     "resolveJsonModule": true,
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "types": ["node"]
+    "types": ["node", "express"],
+    "typeRoots": ["./", "./node_modules/@types"]
   },
-  "include": ["**/*.ts", "**/*.d.ts", "global.d.ts"],
+  "include": ["**/*.ts", "**/*.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
