@@ -59,6 +59,19 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Study Buddy API is running' });
 });
 
+// Debug endpoint - shows which env vars are set (values masked)
+app.get('/api/debug', (req, res) => {
+  res.json({
+    env: {
+      DATABASE_URL: process.env.DATABASE_URL ? '✅ SET' : '❌ MISSING',
+      CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY ? '✅ SET' : '❌ MISSING',
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY ? '✅ SET' : '❌ MISSING',
+      GROQ_API_KEY: process.env.GROQ_API_KEY ? '✅ SET' : '❌ MISSING',
+      NODE_ENV: process.env.NODE_ENV || 'not set',
+    }
+  });
+});
+
 // API Routes
 app.use('/api/explain', explainRoutes);
 app.use('/api/summarize', summarizeRoutes);
