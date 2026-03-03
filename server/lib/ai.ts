@@ -44,8 +44,12 @@ export async function generateAIResponse(prompt: string, systemPrompt?: string):
 
     return text;
   } catch (error) {
+    // Re-throw env var errors directly so they surface clearly
+    if (error instanceof Error && error.message.includes('GROQ_API_KEY')) {
+      throw error;
+    }
     console.error('AI generation error:', error);
-    throw new Error('Failed to generate AI response');
+    throw new Error(`Failed to generate AI response: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
