@@ -1,3 +1,4 @@
+/// <reference types="../types" />
 import { Router, Request, Response, NextFunction } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import multer from 'multer';

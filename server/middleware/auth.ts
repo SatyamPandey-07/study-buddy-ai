@@ -1,3 +1,4 @@
+/// <reference types="../types" />
 import { Request, Response, NextFunction } from 'express';
 
 // Cache the clerk client after first successful load
