@@ -3,11 +3,12 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AppWithAuth, ProtectedRoute } from "./lib/auth";
+import { AppWithAuth, ProtectedRoute, AdminRoute } from "./lib/auth";
 import { ActiveModuleProvider } from "./lib/activeModule";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Stats from "./pages/Stats";
+import Admin from "./pages/Admin";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
@@ -48,6 +49,14 @@ const App = () => (
                     <Stats />
                   </ProtectedRoute>
                 } 
+              />
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <Admin />
+                  </AdminRoute>
+                }
               />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

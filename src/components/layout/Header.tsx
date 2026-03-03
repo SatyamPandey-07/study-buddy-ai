@@ -1,11 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Menu, X, LogOut, BarChart3 } from "lucide-react";
-import { useState } from "react";
+import { BookOpen, Menu, X, LogOut, BarChart3, ShieldCheck } from "lucide-react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth, useClerk, UserButton } from "@clerk/clerk-react";
 import PomodoroTimer from "@/components/PomodoroTimer";
 import { useActiveModule } from "@/lib/activeModule";
+import { adminAPI } from "@/lib/api";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,6 +14,12 @@ const Header = () => {
   const { isSignedIn } = useAuth();
   const { signOut } = useClerk();
   const { activeModule } = useActiveModule();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!isSignedIn) { setIsAdmin(false); return; }
+    adminAPI.check().then(() => setIsAdmin(true)).catch(() => setIsAdmin(false));
+  }, [isSignedIn]);
 
   const handleSignOut = () => {
     signOut();
@@ -43,6 +50,14 @@ const Header = () => {
                     Stats
                   </Button>
                 </Link>
+                {isAdmin && (
+                  <Link to="/admin">
+                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                      <ShieldCheck className="w-4 h-4 mr-2" />
+                      Admin
+                    </Button>
+                  </Link>
+                )}
                 <UserButton 
                   afterSignOutUrl="/"
                   appearance={{

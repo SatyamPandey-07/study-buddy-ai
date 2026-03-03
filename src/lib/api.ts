@@ -323,4 +323,41 @@ export const resourceAPI = {
   },
 };
 
+// Admin API
+export const adminAPI = {
+  check: async () => {
+    const { data } = await api.get('/api/admin/check');
+    return data as { ok: boolean };
+  },
+
+  getStats: async () => {
+    const { data } = await api.get('/api/admin/stats');
+    return data;
+  },
+
+  getUsers: async (params?: { page?: number; search?: string; role?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.page && params.page > 1) qs.append('page', params.page.toString());
+    if (params?.search) qs.append('search', params.search);
+    if (params?.role) qs.append('role', params.role);
+    const { data } = await api.get(`/api/admin/users${qs.toString() ? '?' + qs.toString() : ''}`);
+    return data;
+  },
+
+  setRole: async (userId: string, role: 'USER' | 'ADMIN') => {
+    const { data } = await api.patch(`/api/admin/users/${userId}/role`, { role });
+    return data;
+  },
+
+  deleteUser: async (userId: string) => {
+    const { data } = await api.delete(`/api/admin/users/${userId}`);
+    return data;
+  },
+
+  getActivity: async () => {
+    const { data } = await api.get('/api/admin/activity');
+    return data;
+  },
+};
+
 export default api;

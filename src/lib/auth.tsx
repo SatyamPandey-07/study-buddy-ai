@@ -1,7 +1,7 @@
 import { ClerkProvider, SignedIn, SignedOut, useAuth } from '@clerk/clerk-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { setAuthToken, setAuthTokenGetter } from './api';
+import { setAuthToken, setAuthTokenGetter, adminAPI } from './api';
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -68,7 +68,6 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Redirect to sign-in if not authenticated
     const checkAuth = async () => {
       const signedOut = document.querySelector('[data-clerk-signed-out]');
       if (signedOut) {
@@ -90,4 +89,31 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
       </SignedOut>
     </>
   );
+}
+
+export function AdminRoute({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
+  const { isSignedIn, isLoaded } = useAuth();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      navigate('/sign-in', { replace: true });
+      return;
+    }
+    adminAPI.check()
+      .then(() => setChecking(false))
+      .catch(() => navigate('/dashboard', { replace: true }));
+  }, [isLoaded, isSignedIn, navigate]);
+
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
 }

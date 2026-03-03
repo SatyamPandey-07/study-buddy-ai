@@ -23,6 +23,7 @@ import sessionRoutes from './routes/session.js';
 import streakRoutes from './routes/streak.js';
 import resourceRoutes from './routes/resource.js';
 import { createRateLimiter } from './middleware/rateLimiter.js';
+import adminRoutes from './routes/admin.js';
 
 // 20 AI requests per user per minute
 const aiRateLimiter = createRateLimiter(20, 60 * 1000);
@@ -96,6 +97,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/session', sessionRoutes);
 app.use('/api/streak', streakRoutes);
 app.use('/api/resource', resourceRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Error handling middleware
 app.use((err: Error & { status?: number }, req: Request, res: Response, next: NextFunction) => {
