@@ -11,9 +11,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true,
-    "types": ["node", "express"],
-    "typeRoots": ["./", "./node_modules/@types"]
+    "allowSyntheticDefaultImports": true
   },
   "include": ["**/*.ts", "**/*.d.ts"],
   "exclude": ["node_modules", "dist"]
