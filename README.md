@@ -2,7 +2,7 @@
 
 An intelligent full-stack learning platform powered by AI. Explains concepts, summarizes notes, generates quizzes & flashcards, tracks study sessions with Pomodoro, maintains learning streaks, manages a resource library, and now ships with a full **Admin Panel + RBAC** — all with zero cost in freeware tier!
 
-🌐 **Live Demo**: [https://study-buddy-ai-lovat.vercel.app/](https://study-buddy-ai-lovat.vercel.app/)
+🌐 **Live Demo**: [https://study-buddy-ai.satyampandey.app/ ](https://study-buddy-ai-lovat.vercel.app/)
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black)
