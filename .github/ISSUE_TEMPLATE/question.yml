@@ -1,0 +1,25 @@
+name: ❓ Question
+description: Ask a question about using, running, or contributing to the project
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For general "how do I..." questions, consider starting a
+        [Discussion](../../discussions) instead — issues are best for
+        actionable bugs/features. If you're unsure, this is fine too.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: What have you tried / relevant context?
+    validations:
+      required: false

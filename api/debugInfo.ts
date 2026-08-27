@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
     const env = { ...process.env };
 
     const debugInfo = {
@@ -19,9 +19,9 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     };
 
     try {
-        const { PrismaClient } = require('@prisma/client');
+        const { PrismaClient } = await import('@prisma/client');
         debugInfo.hasPrismaLib = !!PrismaClient;
-        // Don't instantiate, just check if the require works
+        // Don't instantiate, just check if the import works
     } catch (e: any) {
         debugInfo.prismaError = e.message;
     }

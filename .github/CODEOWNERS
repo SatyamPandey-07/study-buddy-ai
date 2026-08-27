@@ -1,0 +1,3 @@
+# Default owner for everything in the repo.
+# GitHub will auto-request a review from this owner on every PR.
+* @SatyamPandey-07

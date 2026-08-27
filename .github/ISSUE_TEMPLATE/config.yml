@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Report a security vulnerability
+    url: https://github.com/SatyamPandey-07/study-buddy-ai/security/advisories/new
+    about: Please don't file public issues for security problems — use private reporting or see SECURITY.md.
+  - name: 💬 Discussions
+    url: https://github.com/SatyamPandey-07/study-buddy-ai/discussions
+    about: General chat, ideas, and Q&A that isn't a specific bug or feature request.

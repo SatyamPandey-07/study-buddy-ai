@@ -1,0 +1,70 @@
+# Config for actions/labeler — auto-labels PRs based on which files changed.
+# See .github/workflows/pr-labeler.yml
+
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/**"
+          - "index.html"
+          - "public/**"
+
+backend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "server/**"
+          - "api/**"
+
+database:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "prisma/**"
+
+landing-page:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/components/landing/**"
+          - "src/pages/Index.tsx"
+
+admin:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/pages/Admin.tsx"
+          - "src/components/**/Admin*"
+
+auth:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/lib/auth.tsx"
+          - "src/pages/SignIn.tsx"
+          - "src/pages/SignUp.tsx"
+
+ui-components:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/components/ui/**"
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "package.json"
+          - "package-lock.json"
+
+ci/cd:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/**"
+          - "vercel.json"
+          - "railway.json"
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - ".github/*.md"
+
+config:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "*.config.ts"
+          - "*.config.js"
+          - "tsconfig*.json"

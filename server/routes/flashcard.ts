@@ -85,7 +85,7 @@ Cover key concepts, definitions, and important facts. Return ONLY the JSON array
       }
       
       // Clean up common JSON issues
-      let cleanJson = jsonMatch[0]
+      const cleanJson = jsonMatch[0]
         .replace(/,\s*,/g, ',')
         .replace(/,\s*}/g, '}')
         .replace(/,\s*\]/g, ']');

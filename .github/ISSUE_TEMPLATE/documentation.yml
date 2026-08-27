@@ -1,0 +1,28 @@
+name: 📝 Documentation
+description: Report unclear, missing, or incorrect documentation
+title: "[Docs]: "
+labels: ["documentation", "needs-triage"]
+body:
+  - type: textarea
+    id: location
+    attributes:
+      label: Where is the problem?
+      description: Link to the file, README section, or page.
+      placeholder: README.md — "Getting Started" section
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: What's wrong or missing?
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested fix
+      description: If you have a specific rewording or addition in mind.
+    validations:
+      required: false

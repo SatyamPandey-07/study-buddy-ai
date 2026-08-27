@@ -118,7 +118,7 @@ Return ONLY valid JSON, no markdown.`;
         parsedResponse = { summary: aiResponse, keyPoints: [] };
       } else {
         // Clean up common JSON issues
-        let cleanJson = jsonMatch[0]
+        const cleanJson = jsonMatch[0]
           .replace(/,\s*,/g, ',')
           .replace(/,\s*}/g, '}')
           .replace(/,\s*\]/g, ']')

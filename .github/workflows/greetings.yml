@@ -1,0 +1,33 @@
+name: Greet first-time contributors
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/first-interaction@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-message: |
+            👋 Thanks for opening your first issue in **Study Buddy AI**! A maintainer will triage it soon.
+
+            In the meantime:
+            - If this is a bug, double-check you've included repro steps and environment info.
+            - If you'd like to work on it yourself, comment `/assign` once it's confirmed and labeled.
+
+            See [CONTRIBUTING.md](../blob/main/.github/CONTRIBUTING.md) for the full workflow.
+          pr-message: |
+            🎉 Thanks for your first pull request to **Study Buddy AI**!
+
+            A maintainer will review it soon — you've been auto-assigned as a reviewer request via `CODEOWNERS`.
+            Make sure `npm run lint` and `npm run build` pass, and the PR template checklist is filled in.
+
+            Welcome aboard! 🚀

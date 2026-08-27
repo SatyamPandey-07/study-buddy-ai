@@ -1,0 +1,36 @@
+name: Mark stale issues and PRs
+
+on:
+  schedule:
+    - cron: "30 1 * * *" # daily at 01:30 UTC
+  workflow_dispatch:
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/stale@v9
+        with:
+          days-before-stale: 30
+          days-before-close: 7
+          stale-issue-label: stale
+          stale-pr-label: stale
+          exempt-issue-labels: "pinned,security,good first issue"
+          exempt-pr-labels: "pinned,security"
+          stale-issue-message: >
+            This issue has been quiet for 30 days, so it's being marked stale.
+            If it's still relevant, just comment and it'll stay open — otherwise
+            it'll close automatically in 7 days.
+          stale-pr-message: >
+            This PR has had no activity for 30 days. If it's still being worked
+            on, push a commit or comment to keep it open — otherwise it'll close
+            in 7 days. Feel free to reopen later if you pick it back up.
+          close-issue-message: >
+            Closing due to inactivity. Feel free to reopen (or open a new issue
+            referencing this one) if it's still relevant.
+          close-pr-message: >
+            Closing due to inactivity. Feel free to reopen or open a fresh PR
+            when you're ready to continue.

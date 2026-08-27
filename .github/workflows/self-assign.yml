@@ -1,0 +1,41 @@
+name: Self-assign issue
+
+# Lets a contributor claim an open issue by commenting `/assign` on it —
+# no need to wait for a maintainer to hand it out.
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  assign:
+    if: >
+      github.event.issue.pull_request == null &&
+      contains(github.event.comment.body, '/assign')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const commenter = context.payload.comment.user.login;
+
+            const { data: issue } = await github.rest.issues.get({ owner, repo, issue_number });
+
+            if (issue.assignees.length > 0) {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number,
+                body: `⏳ This issue is already assigned to ${issue.assignees.map(a => '@' + a.login).join(', ')}. Ask them if it's still in progress, or wait for it to be freed up.`,
+              });
+              return;
+            }
+
+            await github.rest.issues.addAssignees({ owner, repo, issue_number, assignees: [commenter] });
+            await github.rest.issues.addLabels({ owner, repo, issue_number, labels: ['in-progress'] });
+            await github.rest.issues.createComment({
+              owner, repo, issue_number,
+              body: `👋 @${commenter}, you're assigned! Feel free to open a draft PR early if you want feedback along the way. Ping a maintainer if you get stuck.`,
+            });

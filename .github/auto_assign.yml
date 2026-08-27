@@ -1,0 +1,15 @@
+# Config for kentaro-m/auto-assign-action — see .github/workflows/auto-assign.yml
+
+addReviewers: true
+addAssignees: author
+
+reviewers:
+  - SatyamPandey-07
+
+# Don't auto-assign a reviewer to draft PRs or ones marked WIP
+skipKeywords:
+  - wip
+  - draft
+
+# Requeue instead of adding duplicate reviewers
+numberOfReviewers: 1

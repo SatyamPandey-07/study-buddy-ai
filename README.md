@@ -11,6 +11,22 @@ An intelligent full-stack learning platform powered by AI. Explains concepts, su
 ![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=flat&logo=prisma&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white)
 ![Groq](https://img.shields.io/badge/Groq-FF6B35?style=flat&logo=groq&logoColor=white)
+![License](https://img.shields.io/github/license/SatyamPandey-07/study-buddy-ai)
+![CI](https://github.com/SatyamPandey-07/study-buddy-ai/actions/workflows/ci.yml/badge.svg)
+![Issues](https://img.shields.io/github/issues/SatyamPandey-07/study-buddy-ai)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
+![Contributors](https://img.shields.io/github/contributors/SatyamPandey-07/study-buddy-ai)
+
+## 🤝 Contributing
+
+Contributions are very welcome — whether it's a bug fix, a new feature, or a
+docs improvement. Start here:
+
+- **[CONTRIBUTING.md](.github/CONTRIBUTING.md)** — local setup, project structure, PR workflow
+- **[Good first issues](https://github.com/SatyamPandey-07/study-buddy-ai/labels/good%20first%20issue)** — small, well-scoped issues for new contributors
+- **[Code of Conduct](.github/CODE_OF_CONDUCT.md)** and **[Security Policy](.github/SECURITY.md)**
+
+Found an issue you want to work on? Comment `/assign` on it to claim it.
 
 ## ✨ Features
 
@@ -406,7 +422,7 @@ node scripts/make-admin.mjs email@ex.com  # Promote to ADMIN
 
 ## 📄 License
 
-MIT License — free to use for learning or commercial projects.
+[MIT License](LICENSE) — free to use for learning or commercial projects.
 
 ---
 
