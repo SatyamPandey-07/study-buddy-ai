@@ -102,7 +102,7 @@ const TiltCard = ({ children }: { children: React.ReactNode }) => {
 
 const FeaturesSection = () => {
   return (
-    <section className="py-24 bg-muted/30 relative overflow-hidden">
+    <section id="features" className="py-24 bg-muted/30 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-50">
         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-background to-transparent" />

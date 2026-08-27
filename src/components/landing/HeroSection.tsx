@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Brain, BookOpen, Lightbulb } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { EASE_OUT as EASE } from "@/lib/utils";
 
 const HeroSection = () => {
   return (
@@ -60,30 +61,49 @@ const HeroSection = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6, ease: EASE }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-8"
           >
-            <Sparkles className="w-4 h-4" />
+            <motion.span
+              initial={{ opacity: 0, scale: 0.2, rotate: -50 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ duration: 0.9, delay: 0.28, ease: EASE }}
+              className="inline-flex"
+            >
+              <Sparkles className="w-4 h-4" />
+            </motion.span>
             <span>AI-Powered Learning — 10 Features, Zero Compromise</span>
           </motion.div>
 
-          {/* Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6"
-          >
-            Your Personal
-            <br />
-            <span className="gradient-text">AI Study Companion</span>
-          </motion.h1>
+          {/* Headline — masked line reveal */}
+          <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6">
+            <span className="block overflow-hidden py-1">
+              <motion.span
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.9, delay: 0.14, ease: EASE }}
+                className="block"
+              >
+                Your Personal
+              </motion.span>
+            </span>
+            <span className="block overflow-hidden py-1">
+              <motion.span
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.9, delay: 0.32, ease: EASE }}
+                className="gradient-text block"
+              >
+                AI Study Companion
+              </motion.span>
+            </span>
+          </h1>
 
           {/* Subheadline */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.7, delay: 0.5, ease: EASE }}
             className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 text-balance"
           >
             Transform the way you learn with AI that explains concepts, summarizes notes, generates quizzes, and creates flashcards — plus Pomodoro sessions, streak tracking, a resource library, analytics, gamification, and an admin panel.
@@ -93,7 +113,7 @@ const HeroSection = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.62, ease: EASE }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <Link to="/dashboard">
@@ -111,7 +131,7 @@ const HeroSection = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            transition={{ duration: 0.6, delay: 0.74, ease: EASE }}
             className="mt-16 grid grid-cols-3 gap-8 max-w-xl mx-auto"
           >
             {[

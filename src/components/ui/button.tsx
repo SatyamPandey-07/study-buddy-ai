@@ -4,20 +4,23 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+const shine =
+  "relative overflow-hidden isolate after:content-[''] after:absolute after:inset-0 after:bg-gradient-to-r after:from-transparent after:via-white/40 after:to-transparent after:-translate-x-[130%] after:transition-transform after:duration-700 after:ease-out hover:after:translate-x-[130%]";
+
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-soft hover:shadow-glow",
+        default: `bg-primary text-primary-foreground hover:bg-primary/90 shadow-soft hover:shadow-glow ${shine}`,
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent/10 hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        hero: "bg-primary text-primary-foreground font-semibold shadow-glow hover:scale-105 hover:shadow-xl transition-all duration-300",
-        glass: "bg-card/80 backdrop-blur-xl border border-border/50 text-foreground hover:bg-card/90 shadow-card",
-        accent: "bg-accent text-accent-foreground hover:bg-accent/90 shadow-soft",
+        hero: `bg-primary text-primary-foreground font-semibold shadow-glow hover:scale-105 hover:shadow-xl transition-all duration-300 ${shine}`,
+        glass: `bg-card/80 backdrop-blur-xl border border-border/50 text-foreground hover:bg-card/90 shadow-card ${shine}`,
+        accent: `bg-accent text-accent-foreground hover:bg-accent/90 shadow-soft ${shine}`,
       },
       size: {
         default: "h-10 px-4 py-2",
