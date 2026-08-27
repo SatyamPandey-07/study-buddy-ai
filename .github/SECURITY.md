@@ -12,7 +12,7 @@ issue**. Instead:
 
 1. Use [GitHub's private vulnerability reporting](../../security/advisories/new)
    for this repo, or
-2. Email **hawwyush@gmail.com** with details (steps to reproduce, impact, and
+2. Email **pandeysatyam1802@gmail.com** with details (steps to reproduce, impact, and
    any suggested fix).
 
 You should expect an initial response within 72 hours. We'll work with you to

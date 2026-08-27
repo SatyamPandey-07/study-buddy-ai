@@ -99,4 +99,4 @@ Search existing issues first to avoid duplicates.
 
 Open a [question issue](../../issues/new/choose) or start a
 [Discussion](../../discussions) if enabled. For anything sensitive (security,
-conduct concerns), email **hawwyush@gmail.com** directly.
+conduct concerns), email **pandeysatyam1802@gmail.com** directly.

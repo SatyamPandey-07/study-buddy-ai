@@ -47,7 +47,7 @@ representing the project in public spaces.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the maintainer at **hawwyush@gmail.com**. All complaints will be
+reported to the maintainer at **pandeysatyam1802@gmail.com**. All complaints will be
 reviewed and investigated promptly and fairly.
 
 ## Attribution
