@@ -1,5 +1,6 @@
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Brain, FileText, HelpCircle, Layers, Timer, Flame, FolderOpen, Trophy, BarChart3, ShieldCheck } from "lucide-react";
+import type { MouseEvent } from "react";
 
 const features = [
   {
@@ -70,6 +71,35 @@ const features = [
   },
 ];
 
+const TiltCard = ({ children }: { children: React.ReactNode }) => {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [8, -8]), { stiffness: 300, damping: 25 });
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-8, 8]), { stiffness: 300, damping: 25 });
+
+  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    x.set((e.clientX - rect.left) / rect.width - 0.5);
+    y.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{ rotateX, rotateY, transformPerspective: 800 }}
+      className="h-full"
+    >
+      {children}
+    </motion.div>
+  );
+};
+
 const FeaturesSection = () => {
   return (
     <section className="py-24 bg-muted/30 relative overflow-hidden">
@@ -108,24 +138,26 @@ const FeaturesSection = () => {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="group relative"
             >
-              <div className="h-full p-6 rounded-2xl bg-card border border-border shadow-card hover:shadow-glow transition-all duration-300 hover:-translate-y-1">
-                {feature.isNew && (
-                  <div className="absolute top-4 right-4">
-                    <span className="px-2 py-1 text-xs font-bold bg-primary text-primary-foreground rounded-full">
-                      NEW
-                    </span>
+              <TiltCard>
+                <div className="h-full p-6 rounded-2xl bg-card border border-border shadow-card hover:shadow-glow transition-shadow duration-300">
+                  {feature.isNew && (
+                    <div className="absolute top-4 right-4">
+                      <span className="px-2 py-1 text-xs font-bold bg-primary text-primary-foreground rounded-full">
+                        NEW
+                      </span>
+                    </div>
+                  )}
+                  <div className={`w-12 h-12 rounded-xl ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                    <feature.icon className="w-6 h-6" />
                   </div>
-                )}
-                <div className={`w-12 h-12 rounded-xl ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                  <feature.icon className="w-6 h-6" />
+                  <h3 className="font-heading text-xl font-semibold text-foreground mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-muted-foreground">
+                    {feature.description}
+                  </p>
                 </div>
-                <h3 className="font-heading text-xl font-semibold text-foreground mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-muted-foreground">
-                  {feature.description}
-                </p>
-              </div>
+              </TiltCard>
             </motion.div>
           ))}
         </div>
