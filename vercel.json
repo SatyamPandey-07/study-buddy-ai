@@ -14,18 +14,6 @@
       "destination": "/api/index.ts"
     },
     {
-      "source": "/vesper",
-      "destination": "/vesper/index.html"
-    },
-    {
-      "source": "/vesper/",
-      "destination": "/vesper/index.html"
-    },
-    {
-      "source": "/vesper/(.*)",
-      "destination": "/vesper/$1"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

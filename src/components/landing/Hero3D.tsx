@@ -1,17 +1,18 @@
 import { Suspense, useRef, useMemo } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { MeshDistortMaterial, Float, Sphere } from "@react-three/drei";
+import { Float } from "@react-three/drei";
 import * as THREE from "three";
 
 // Amber (primary) + teal (accent) — matches the site's HSL theme tokens.
 const COLOR_PRIMARY = "#f5a623";
 const COLOR_ACCENT = "#2dbfae";
 
-function CoreBlob() {
+function CoreGem() {
   const meshRef = useRef<THREE.Mesh>(null);
+  const wireRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
-    if (!meshRef.current) return;
+    if (!meshRef.current || !wireRef.current) return;
     const t = state.clock.getElapsedTime();
     meshRef.current.rotation.x = t * 0.12;
     meshRef.current.rotation.y = t * 0.18;
@@ -20,24 +21,29 @@ function CoreBlob() {
     const { pointer } = state;
     meshRef.current.rotation.y += pointer.x * 0.15;
     meshRef.current.rotation.x += -pointer.y * 0.1;
+
+    wireRef.current.rotation.copy(meshRef.current.rotation);
   });
 
   return (
     <Float speed={1.4} rotationIntensity={0.3} floatIntensity={0.8}>
-      <Sphere ref={meshRef} args={[1.35, 128, 128]}>
-        <MeshDistortMaterial
+      <mesh ref={meshRef}>
+        <icosahedronGeometry args={[1.35, 1]} />
+        <meshStandardMaterial
           color={COLOR_PRIMARY}
-          attach="material"
-          distort={0.4}
-          speed={1.8}
+          flatShading
           roughness={0.2}
-          metalness={0.4}
+          metalness={0.55}
           emissive={COLOR_PRIMARY}
           emissiveIntensity={0.3}
           transparent
-          opacity={0.28}
+          opacity={0.32}
         />
-      </Sphere>
+      </mesh>
+      <mesh ref={wireRef}>
+        <icosahedronGeometry args={[1.36, 1]} />
+        <meshBasicMaterial color={COLOR_ACCENT} wireframe transparent opacity={0.35} />
+      </mesh>
     </Float>
   );
 }
@@ -98,7 +104,7 @@ function Scene() {
       <pointLight position={[4, 4, 4]} intensity={1.4} color={COLOR_PRIMARY} />
       <pointLight position={[-4, -3, 2]} intensity={1.1} color={COLOR_ACCENT} />
 
-      <CoreBlob />
+      <CoreGem />
 
       <OrbitRing radius={2.1} tilt={[Math.PI / 2.4, 0.3, 0]} speed={0.18} color={COLOR_ACCENT} />
       <OrbitRing radius={2.65} tilt={[Math.PI / 3.2, -0.4, 0.2]} speed={-0.12} color={COLOR_PRIMARY} />
