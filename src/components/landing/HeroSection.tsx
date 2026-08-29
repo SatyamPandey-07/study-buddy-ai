@@ -3,6 +3,7 @@ import { ArrowRight, Sparkles, Brain, BookOpen, Lightbulb } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { EASE_OUT as EASE } from "@/lib/utils";
+import Hero3D from "@/components/landing/Hero3D";
 
 const HeroSection = () => {
   return (
@@ -31,6 +32,9 @@ const HeroSection = () => {
           }}
         />
       </div>
+
+      {/* 3D floating centerpiece */}
+      <Hero3D />
 
       {/* Floating Icons */}
       <motion.div
